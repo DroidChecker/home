@@ -1,0 +1,76 @@
+import string
+import sys
+import time
+sys.path.append("..")
+from main import *
+
+class Test(AndroidCheck):
+    def __init__(
+        self,
+        apk_path,
+        device_serial="emulator-5554",
+        output_dir="output",
+        policy_name="pbt",
+        timeout=-1,
+        build_model_timeout=-1,
+        number_of_events_that_restart_app=100,
+    ):
+        super().__init__(
+            apk_path,
+            device_serial=device_serial,
+            output_dir=output_dir,
+            policy_name=policy_name,
+            timeout=timeout,
+            build_model_timeout=build_model_timeout,
+            number_of_events_that_restart_app=number_of_events_that_restart_app,
+        )
+
+    @initialize()
+    def set_up(self):
+        pass
+
+    @precondition(
+        lambda self: self.device(resourceId="com.ichi2.anki:id/dropdown_deck_name").exists() and not self.device(resourceId="com.ichi2.anki:id/navdrawer_items_container").exists()
+    )
+    @rule()
+    def add_card_in_one_deck_should_work(self):
+        deck_name = self.device(resourceId="com.ichi2.anki:id/dropdown_deck_name").get_text()
+        card_count = int(self.device(resourceId="com.ichi2.anki:id/dropdown_deck_counts").get_text().split(" ")[0])
+        print("deck_name: " + str(deck_name))
+        print("card_count: " + str(card_count))
+        # add a card
+        self.device(resourceId="com.ichi2.anki:id/action_add_note_from_card_browser").click()
+        time.sleep(1)
+        self.device(resourceId="com.ichi2.anki:id/note_deck_spinner").click()
+        time.sleep(1)
+        self.device(text=deck_name).click()
+        time.sleep(1)
+        front = st.text(alphabet=string.printable,min_size=1, max_size=6).example()
+        print("front: " + str(front))
+        self.device(resourceId="com.ichi2.anki:id/id_note_editText").set_text(front)
+        time.sleep(1)
+        self.device(resourceId="com.ichi2.anki:id/action_save").click()
+        time.sleep(1)
+        self.device(description="Navigate up").click()
+        time.sleep(1)
+        # check if the card is added
+        new_card_count = int(self.device(resourceId="com.ichi2.anki:id/dropdown_deck_counts").get_text().split(" ")[0])
+        print("new_card_count: " + str(new_card_count))
+        assert new_card_count == card_count + 1, "card count should increase by 1"
+        
+
+
+
+start_time = time.time()
+
+t = Test(
+    apk_path="./apk/ankidroid/2.11alpha7.apk",
+    device_serial="emulator-5554",
+    output_dir="output/ankidroid/6288/random_100/1",
+    policy_name="random",
+    timeout=21600,
+    number_of_events_that_restart_app = 100
+)
+t.start()
+execution_time = time.time() - start_time
+print("execution time: " + str(execution_time))

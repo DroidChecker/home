@@ -1,0 +1,4 @@
+uiautomator2==2.16.23
+androguard==4.0.0
+langid==1.1.6
+hypothesis
