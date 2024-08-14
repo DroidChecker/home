@@ -232,6 +232,9 @@ class DeviceState(object):
                 shutil.copyfile(self.screenshot_path, dest_screenshot_path)
             if event is not None:
                 self.draw_event(event, dest_screenshot_path)
+                os.rename(dest_screenshot_path, "%s/screen_%s_%s.png" % (output_dir, self.tag, event.get_event_name()))
+                dest_screenshot_path = "%s/screen_%s_%s.png" % (output_dir, self.tag, event.get_event_name())
+                
             self.screenshot_path = dest_screenshot_path
             # from PIL.Image import Image
             # if isinstance(self.screenshot_path, Image):

@@ -84,19 +84,16 @@ class InputPolicy(object):
     def __init__(self, device, app, android_check=None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.time_recoder = Time()
-        
+
         self.device = device
         self.app = app
         self.action_count = 0
         self.master = None
         self.android_check = android_check
         self.input_manager = None
-
-        
         self.time_needed_to_satisfy_precondition = []
-        
+
         self.time_to_check_rule = []
-        self.time_needed_to_trigger_bug = []
 
         self.last_event = None
 
@@ -118,14 +115,14 @@ class InputPolicy(object):
         :param input_manager: instance of InputManager
         """
         self.action_count = 0
-        self.input_manager = input_manager       
+        self.input_manager = input_manager
         while (
-            input_manager.enabled
-            and self.action_count
-            < input_manager.event_count
+                input_manager.enabled
+                and self.action_count
+                < input_manager.event_count
         ):
             try:
-                
+
                 self.device.u2.set_fastinput_ime(True)
                 self.logger.info("action count: %d" % self.action_count)
                 if self.action_count == 0 and self.master is None:
@@ -142,7 +139,7 @@ class InputPolicy(object):
                 self.logger.info("stop sending events: %s" % e)
                 self.logger.info("action count: %d" % self.action_count)
                 break
-            
+
             except RuntimeError as e:
                 self.logger.info("RuntimeError: %s, stop sending events" % e)
                 break
@@ -154,12 +151,13 @@ class InputPolicy(object):
             self.action_count += 1
         self.tear_down()
 
-    @abstractmethod    
+    @abstractmethod
     def tear_down(self):
         """
         
         """
         pass
+
     @abstractmethod
     def generate_event(self):
         """
@@ -176,12 +174,13 @@ class InputPolicy(object):
         """
         pass
 
+
 class UtgBasedInputPolicy(InputPolicy):
     """
     state-based input policy
     """
 
-    def __init__(self, device, app, random_input, android_check=None, guide=None):
+    def __init__(self, device, app, random_input, android_check=None):
         super(UtgBasedInputPolicy, self).__init__(device, app, android_check)
         self.random_input = random_input
         self.script = None
@@ -190,9 +189,8 @@ class UtgBasedInputPolicy(InputPolicy):
         self.last_event = None
         self.last_state = None
         self.current_state = None
-        self.guide = guide
         self.utg = UTG(
-            device=device, app=app, random_input=random_input, guide=self.guide
+            device=device, app=app, random_input=random_input
         )
         self.script_event_idx = 0
         if self.device.humanoid is not None:
@@ -201,17 +199,19 @@ class UtgBasedInputPolicy(InputPolicy):
         rules = self.android_check.rules()
         self.rules = {}
         for rule in rules:
-            self.rules[rule.function.__name__] = {"#satisfy pre":0,"#check property":0,"#trigger the bug":0}
+            self.rules[rule.function.__name__] = {"#satisfy pre": 0, "#check property": 0, "#trigger the bug": 0}
+        # record the action count, time and property name when the bug is triggered
+        self.triggered_bug_information = []
 
     def check_rule_with_precondition(self):
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_to_check) == 0:
             print("No rules match the precondition")
-            if hasattr(self,"not_reach_precondition_path_number"):
+            if hasattr(self, "not_reach_precondition_path_number"):
                 self.not_reach_precondition_path_number.append(self.path_index)
             return
             # continue
-        
+
         for rule in rules_to_check:
             self.rules[rule.function.__name__]["#satisfy pre"] += 1
         rule_to_check = random.choice(rules_to_check)
@@ -225,17 +225,19 @@ class UtgBasedInputPolicy(InputPolicy):
             2: UiObjectNotFoundError
             3: don't need to check property,because the precondition is not satisfied
             '''
-            
+
             result = self.android_check.execute_rule(rule_to_check)
             if result == 0:
                 self.logger.error("-------check rule : assertion error------")
                 self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
-                self.time_needed_to_trigger_bug.append(self.time_recoder.get_time_duration())
                 self.rules[rule_to_check.function.__name__]["#trigger the bug"] += 1
+                self.triggered_bug_information.append((self.action_count, self.time_recoder.get_time_duration(), rule_to_check.function.__name__))
+
+
             elif result == 1:
                 self.logger.info("-------check rule : pass------")
                 self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
-                
+
             elif result == 2:
                 self.logger.error("-------rule execute failed UiObjectNotFoundError-----------")
             else:
@@ -248,11 +250,11 @@ class UtgBasedInputPolicy(InputPolicy):
                 self.android_check.get_rules_without_preconditions()
             )
             if result:
-                print("-------rule_without_precondition execute success-----------")
+                self.logger.info("-------rule_without_precondition execute success-----------")
             else:
-                print("-------rule_without_precondition execute failed-----------")
+                self.logger.error("-------rule_without_precondition execute failed-----------")
         else:
-            print("-------no rule_without_precondition to execute-----------")
+            self.logger.info("-------no rule_without_precondition to execute-----------")
 
     def stop_app_events(self):
         # self.logger.info("reach the target state, restart the app")
@@ -312,36 +314,42 @@ class UtgBasedInputPolicy(InputPolicy):
         """
         self.logger.info("----------------------------------------")
 
-        if len(self.time_needed_to_trigger_bug) > 0:
-            self.logger.info("the first time needed to trigger the bug: %s" % self.time_needed_to_trigger_bug[0])
-            
-        if len(self.time_needed_to_satisfy_precondition)>0:
-            self.logger.info("the first time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition[0])
-            self.logger.info("How many times satisfy the precondition: %s" % len(self.time_needed_to_satisfy_precondition))
-            if len(self.time_needed_to_trigger_bug) > 0:
-                self.logger.info("How many times trigger the bug: %s" % len(self.time_needed_to_trigger_bug)) 
+        if len(self.triggered_bug_information) > 0:
+            self.logger.info("the first time needed to trigger the bug: %s" % self.triggered_bug_information[0][1])
+
+        if len(self.time_needed_to_satisfy_precondition) > 0:
+            self.logger.info(
+                "the first time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition[0])
+            self.logger.info(
+                "How many times satisfy the precondition: %s" % len(self.time_needed_to_satisfy_precondition))
+            if len(self.triggered_bug_information) > 0:
+                self.logger.info("How many times trigger the bug: %s" % len(self.triggered_bug_information))
             self.logger.info("----------------------------------------")
-            self.logger.info("the time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition)
+            self.logger.info(
+                "the time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition)
             self.logger.info("How many times check the property: %s" % len(self.time_to_check_rule))
-            self.logger.info("the time needed to check the property: %s" % self.time_to_check_rule)     
+            self.logger.info("the time needed to check the property: %s" % self.time_to_check_rule)
         else:
             self.logger.info("did not satisfy the precondition")
-            
 
-        if len(self.time_needed_to_trigger_bug) > 0:
-            self.logger.info("the time needed to trigger the bug: %s" % self.time_needed_to_trigger_bug)
+        if len(self.triggered_bug_information) > 0:
+            self.logger.info("the action count and time needed to trigger the bug: %s" % self.triggered_bug_information)
         else:
             self.logger.info("did not trigger the bug")
-        
+
         for rule in self.rules:
-            self.logger.info("rule: %s, #satisfy pre: %d, #check property: %d, #trigger the bug: %d" % (rule, self.rules[rule]["#satisfy pre"], self.rules[rule]["#check property"], self.rules[rule]["#trigger the bug"]))
+            self.logger.info("rule: %s, #satisfy pre: %d, #check property: %d, #trigger the bug: %d" % (
+            rule, self.rules[rule]["#satisfy pre"], self.rules[rule]["#check property"],
+            self.rules[rule]["#trigger the bug"]))
+
 
 class MutatePolicy(UtgBasedInputPolicy):
     """
     
     """
 
-    def __init__(self, device, app, random_input, android_check=None, guide=None,main_path=None,run_initial_rules_after_every_mutation=True):
+    def __init__(self, device, app, random_input, android_check=None, main_path=None,
+                 run_initial_rules_after_every_mutation=True):
         super(MutatePolicy, self).__init__(
             device, app, random_input, android_check, guide
         )
@@ -362,15 +370,15 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.__event_trace = ""
         self.__missed_states = set()
         self.__random_explore = False
-        
+
         self.execute_main_path = True
-        
+
         self.current_index_on_main_path = 0
 
         self.max_number_of_mutate_steps_on_single_node = 20
         self.current_number_of_mutate_steps_on_single_node = 0
 
-        #self.max_number_of_events_that_try_to_find_event_on_main_path = min(10, len(self.main_path))
+        # self.max_number_of_events_that_try_to_find_event_on_main_path = min(10, len(self.main_path))
         self.number_of_events_that_try_to_find_event_on_main_path = 0
         self.index_on_main_path_after_mutation = -1
 
@@ -388,7 +396,8 @@ class MutatePolicy(UtgBasedInputPolicy):
         self.main_path = self.get_main_path()
         self.main_path_list = copy.deepcopy(self.main_path)
         self.max_number_of_events_that_try_to_find_event_on_main_path = min(10, len(self.main_path))
-        self.mutate_node_index_on_main_path = len(self.main_path) 
+        self.mutate_node_index_on_main_path = len(self.main_path)
+
     def get_main_path(self):
         import json
         if self.main_path is None:
@@ -408,10 +417,11 @@ class MutatePolicy(UtgBasedInputPolicy):
         if event is not None:
             self.last_state = self.current_state
             self.last_event = event
-            return event 
+            return event
         if self.action_count == 2 or isinstance(self.last_event, ReInstallAppEvent):
             self.select_and_initialize_main_path()
-        if self.action_count == 2 or isinstance(self.last_event, ReInstallAppEvent) or (isinstance(self.last_event, KillAndRestartAppEvent) and self.run_initial_rules_after_every_mutation):
+        if self.action_count == 2 or isinstance(self.last_event, ReInstallAppEvent) or (
+                isinstance(self.last_event, KillAndRestartAppEvent) and self.run_initial_rules_after_every_mutation):
             self.run_initial_rules()
             time.sleep(2)
             return None
@@ -423,7 +433,7 @@ class MutatePolicy(UtgBasedInputPolicy):
                 self.last_state = self.current_state
                 self.last_event = event
                 return event
-            
+
         if event is None:
             event = self.mutate_the_main_path()
 
@@ -446,12 +456,13 @@ class MutatePolicy(UtgBasedInputPolicy):
 
     def check_property_with_probability(self):
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
-        
+
         if len(rules_to_check) > 0:
             t = self.time_recoder.get_time_duration()
             self.time_needed_to_satisfy_precondition.append(t)
-            self.logger.info("has rule that matches the precondition and the time duration is "+ self.time_recoder.get_time_duration())
-            if random.random() < 0.5:   
+            self.logger.info(
+                "has rule that matches the precondition and the time duration is " + self.time_recoder.get_time_duration())
+            if random.random() < 0.5:
                 self.time_to_check_rule.append(t)
                 self.logger.info(" check rule")
                 self.check_rule_with_precondition()
@@ -484,9 +495,9 @@ class MutatePolicy(UtgBasedInputPolicy):
                 else:
                     self.logger.info("can't find the event in the main path")
                     return self.end_mutation()
-            
+
             return self.end_mutation()
-        
+
         self.index_on_main_path_after_mutation = -1
 
         if self.check_property_with_probability() == 1:
@@ -500,7 +511,8 @@ class MutatePolicy(UtgBasedInputPolicy):
         
         """
         if self.current_index_on_main_path == self.mutate_node_index_on_main_path:
-            self.logger.info("reach the mutate index, start mutate on the node %d" % self.mutate_node_index_on_main_path)
+            self.logger.info(
+                "reach the mutate index, start mutate on the node %d" % self.mutate_node_index_on_main_path)
             self.execute_main_path = False
             return None
         self.logger.info("execute node index on main path: %d" % self.current_index_on_main_path)
@@ -518,12 +530,12 @@ class MutatePolicy(UtgBasedInputPolicy):
         
         """
         if self.index_on_main_path_after_mutation == -1:
-            for i in range(len(self.main_path_list)-1, -1, -1):
+            for i in range(len(self.main_path_list) - 1, -1, -1):
                 event_dict = self.main_path_list[i]
                 event = self.get_event_from_dict(event_dict)
                 if event is None:
                     continue
-                self.index_on_main_path_after_mutation = i+1
+                self.index_on_main_path_after_mutation = i + 1
                 return event
         else:
             event_dict = self.main_path_list[self.index_on_main_path_after_mutation]
@@ -533,7 +545,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             self.index_on_main_path_after_mutation += 1
             return event
         return None
-    
+
     def get_event_from_dict(self, event_dict):
         view = None
         event = None
@@ -546,35 +558,35 @@ class MutatePolicy(UtgBasedInputPolicy):
                 event = SetTextEvent(view=view, text=event_dict['text'])
             elif 'text_prefix' in event_dict:
                 random_text = st.text(
-                        alphabet=string.ascii_letters, min_size=1, max_size=5
-                    ).example()
+                    alphabet=string.ascii_letters, min_size=1, max_size=5
+                ).example()
                 event = SetTextEvent(
                     view=view,
                     text=event_dict['text_prefix'] + random_text,
                 )
             else:
-                if not self.last_random_text is None and "resource_id" in event_dict['ui_element'] and "search" in event_dict['ui_element']['resource_id'] and "use_prior_text" in event_dict:
-                    
+                if not self.last_random_text is None and "resource_id" in event_dict['ui_element'] and "search" in \
+                        event_dict['ui_element']['resource_id'] and "use_prior_text" in event_dict:
                     self.logger.info("use the last random text %s" % self.last_random_text)
                     charactor = random.choice(self.last_random_text)
                     event = SetTextEvent(
                         view=view,
                         text=charactor,
-                    )     
+                    )
                     return event
-                    
+
                 random_text = st.text(
-                        alphabet=string.ascii_letters, min_size=1, max_size=5
-                    ).example()
+                    alphabet=string.ascii_letters, min_size=1, max_size=5
+                ).example()
                 event = SetTextEvent(
                     view=view,
                     text=random_text,
                 )
                 self.last_random_text = random_text
             return event
-        
+
         if "ui_element" in event_dict:
-            view = self.current_state.get_view_by_attribute(event_dict["ui_element"],random_select=True)
+            view = self.current_state.get_view_by_attribute(event_dict["ui_element"], random_select=True)
             if view is None:
                 self.logger.warning("view is None")
                 return None
@@ -588,21 +600,20 @@ class MutatePolicy(UtgBasedInputPolicy):
         elif event_dict["event_type"] == "enter":
             event = KeyEvent(name="ENTER")
         elif event_dict["event_type"] == "search":
-            event =  SearchEvent()
+            event = SearchEvent()
         elif event_dict["event_type"] == "scroll":
             if event_dict["direction"] == "up":
-                event = ScrollEvent(view=view,direction="UP")
+                event = ScrollEvent(view=view, direction="UP")
             elif event_dict["direction"] == "down":
-                event = ScrollEvent(view=view,direction="DOWN")
+                event = ScrollEvent(view=view, direction="DOWN")
             elif event_dict["direction"] == "left":
-                event = ScrollEvent(view=view,direction="LEFT")
+                event = ScrollEvent(view=view, direction="LEFT")
             else:
-                event = ScrollEvent(view=view,direction="RIGHT")
+                event = ScrollEvent(view=view, direction="RIGHT")
         elif event_dict["event_type"] == "wait":
             wait_time = event_dict["time"]
             time.sleep(wait_time)
         return event
-
 
     def explore_app(self):
         """
@@ -627,7 +638,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             #    a normal start. clear self.__num_restarts.
 
             if self.__event_trace.endswith(
-                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+                    EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
             ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
                 self.__num_restarts += 1
                 self.logger.info(
@@ -742,7 +753,7 @@ class MutatePolicy(UtgBasedInputPolicy):
             #    a normal start. clear self.__num_restarts.
 
             if self.__event_trace.endswith(
-                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+                    EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
             ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
                 self.__num_restarts += 1
                 self.logger.info(
@@ -782,16 +793,17 @@ class MutatePolicy(UtgBasedInputPolicy):
             # If the app is in foreground
             self.__num_steps_outside = 0
 
-
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
+
 
 class UtgRandomPolicy(UtgBasedInputPolicy):
     """
     random input policy based on UTG
     """
 
-    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False, number_of_events_that_restart_app=100, clear_and_restart_app_data_after_100_events=False):
+    def __init__(self, device, app, random_input=True, android_check=None, restart_app_after_check_property=False,
+                 number_of_events_that_restart_app=100, clear_and_restart_app_data_after_100_events=False):
         super(UtgRandomPolicy, self).__init__(
             device, app, random_input, android_check
         )
@@ -828,10 +840,10 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         generate an event
         @return:
         """
-        
+
         if self.action_count == 2 or isinstance(self.last_event, ReInstallAppEvent):
             self.run_initial_rules()
-    
+
         # Get current device state
         self.current_state = self.device.get_current_state(self.action_count)
         if self.current_state is None:
@@ -845,12 +857,13 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             self.logger.info("clear and restart app after %s events" % self.number_of_events_that_restart_app)
             return ReInstallAppEvent(self.app)
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
-        
+
         if len(rules_to_check) > 0:
             t = self.time_recoder.get_time_duration()
             self.time_needed_to_satisfy_precondition.append(t)
-            self.logger.info("has rule that matches the precondition and the time duration is "+ self.time_recoder.get_time_duration())
-            if random.random() < 0.5:   
+            self.logger.info(
+                "has rule that matches the precondition and the time duration is " + self.time_recoder.get_time_duration())
+            if random.random() < 0.5:
                 self.time_to_check_rule.append(t)
                 self.logger.info(" check rule")
                 self.check_rule_with_precondition()
@@ -864,7 +877,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         if event is None:
             event = self.generate_event_based_on_utg()
-        
+
         if isinstance(event, RotateDevice):
             if self.last_rotate_events == KEY_RotateDeviceNeutralEvent:
                 self.last_rotate_events = KEY_RotateDeviceRightEvent
@@ -876,7 +889,6 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         self.last_state = self.current_state
         self.last_event = event
         return event
-
 
     def generate_event_based_on_utg(self):
         """
@@ -901,7 +913,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             #    a normal start. clear self.__num_restarts.
 
             if self.__event_trace.endswith(
-                EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
+                    EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
             ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
                 self.__num_restarts += 1
                 self.logger.info(
@@ -950,8 +962,6 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         self.__event_trace += EVENT_FLAG_EXPLORE
         return random.choice(possible_events)
-    
+
     def __update_utg(self):
         self.utg.add_transition(self.last_event, self.last_state, self.current_state)
-
-    

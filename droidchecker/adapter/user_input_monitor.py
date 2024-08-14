@@ -17,7 +17,7 @@ class UserInputMonitor(Adapter):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         if device is None:
-            from droidbot.device import Device
+            from droidchecker.device import Device
             device = Device()
         self.device = device
         self.connected = False

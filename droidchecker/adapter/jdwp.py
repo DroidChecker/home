@@ -25,7 +25,7 @@ class JDWP(Adapter):
         self.host = "localhost"
 
         if device is None:
-            from droidbot.device import Device
+            from droidchecker.device import Device
             device = Device()
         self.device = device
         self.port = self.device.get_random_port()

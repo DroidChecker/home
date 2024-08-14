@@ -69,10 +69,10 @@ class DroidBot(object):
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir)
             html_index_path = pkg_resources.resource_filename(
-                "droidbot", "resources/index.html"
+                "droidchecker", "resources/index.html"
             )
             stylesheets_path = pkg_resources.resource_filename(
-                "droidbot", "resources/stylesheets"
+                "droidchecker", "resources/stylesheets"
             )
             target_stylesheets_dir = os.path.join(output_dir, "stylesheets")
             if os.path.exists(target_stylesheets_dir):

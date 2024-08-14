@@ -5,7 +5,7 @@ import random
 import datetime
 import networkx as nx
 
-from droidbot import utils
+from droidchecker import utils
 
 
 class UTG(object):
@@ -13,7 +13,7 @@ class UTG(object):
     UI transition graph
     """
 
-    def __init__(self, device, app, random_input, guide=None):
+    def __init__(self, device, app, random_input):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.device = device
         self.app = app
@@ -35,9 +35,6 @@ class UTG(object):
         self.first_state_after_initialization = None
         self.start_time = datetime.datetime.now()
 
-        self.guide = guide
-        self.target_state = None
-
     @property
     def first_state_str(self):
         return self.first_state.state_str if self.first_state else None
@@ -57,9 +54,6 @@ class UTG(object):
     def clear_graph(self):
         self.G.clear()
         self.G2.clear()
-    #  set the target state
-    def set_target_state(self, state):
-        self.target_state = state
 
     def add_transition(self, event, old_state, new_state):
         self.add_node(old_state,event)
@@ -126,7 +120,7 @@ class UTG(object):
         state.save2dir(output_dir,event)
         utils.generate_report(img_path=output_dir, html_path=output_dir, run_count=0)
         if state.state_str not in self.G.nodes():
-            state.save2dir()
+            #state.save2dir()
             self.G.add_node(state.state_str, state=state)
             if self.first_state is None:
                 self.first_state = state
@@ -378,43 +372,6 @@ class UTG(object):
             print(e)
             return None
 
-    def highlight_shortest_path(self, from_state_str, to_state_str):
-        if self.target_state is None:
-            return False
-        first_state_structure_str = self.first_state.structure_str
-        target_state_structure_str = self.target_state.structure_str
-
-        from_state_structure_str = self.find_structure_str(from_state_str)
-        to_state_structure_str = self.find_structure_str(to_state_str)
-
-        initial_to_last_edges = self.get_G2_nav_edges(
-            first_state_structure_str, target_state_structure_str
-        )
-        if initial_to_last_edges is not None:
-            for from_structure_str, to_structure_str, event in initial_to_last_edges:
-                if (
-                    from_state_structure_str == from_structure_str
-                    and to_state_structure_str == to_structure_str
-                ):
-                    return True
-        return False
-
-    def highlight_path(self, from_state_str, to_state_str, path):
-        '''
-        highlight the path if the transition is on the shortest path w.r.t. the activity graph
-        '''
-        if from_state_str is None or to_state_str is None:
-            return False
-        from_state_activity = self.find_activity_according_to_state_str(from_state_str)
-        to_state_activity = self.find_activity_according_to_state_str(to_state_str)
-
-        last_activity = None
-        for activity in path:
-            if last_activity == from_state_activity and activity == to_state_activity:
-                return True
-            last_activity = activity
-        return False
-
     def find_activity_according_to_state_str(self, state_str):
         for node_state_str in self.G.nodes:
             if node_state_str == state_str:
@@ -425,223 +382,4 @@ class UTG(object):
             if node_state_str == state_str:
                 return self.G.nodes[node_state_str]["state"].structure_str
         return None
-
-    def get_G2_nav_edges(self, from_state_structure_str, to_state_structure_str):
-        if from_state_structure_str is None or to_state_structure_str is None:
-            return None
-        # from_state_str = from_state.state_str
-        # to_state_str = to_state.state_str
-        try:
-            nav_edges = []
-            state_strs = nx.shortest_path(
-                G=self.G2,
-                source=from_state_structure_str,
-                target=to_state_structure_str,
-            )
-            if not isinstance(state_strs, list) or len(state_strs) < 2:
-                return None
-            start_state_structure_str = state_strs[0]
-            for state_str in state_strs[1:]:
-                edge = self.G2[start_state_structure_str][state_str]
-                edge_event_strs = list(edge["events"].keys())
-                # start_state = random.choice(self.G.nodes[start_state_str]['states'])
-                event_str = random.choice(edge_event_strs)
-                event = edge["events"][event_str]["event"]
-                nav_edges.append((start_state_structure_str, state_str, event))
-                start_state_structure_str = state_str
-            if nav_edges is None:
-                return None
-            return nav_edges
-            # return nav_steps
-            # simplify the path
-            # simple_nav_edges = []
-            # last_state, last_action = nav_edges[-1]
-            # for state, edge in nav_edges:
-            #     if state.structure_str == last_state.structure_str:
-            #         simple_nav_edges.append((state, last_action))
-            #         break
-            #     simple_nav_edges.append((state, edge))
-            # return simple_nav_edges
-        except Exception as e:
-            print(e)
-            return None
-
-    # return the next event to target state
-    def get_G2_nav_action(self, current_state):
-        if current_state is None:
-            self.logger.info("current state is none")
-            return None
-        if self.target_state is None:
-            self.logger.info("target state is none")
-            return None
-        current_structure_str = current_state.structure_str
-        nav_edges = self.get_G2_nav_edges(
-            current_structure_str, self.target_state.structure_str
-        )
-        if nav_edges is None:
-            self.logger.info("nav edges is none")
-            return None
-        if nav_edges is not None:
-            for start_structure_str, to_state_str, event in nav_edges:
-                if start_structure_str == current_structure_str:
-                    return event
-        self.logger.info("No next action found")
-        return None
-
-    # if current state is on the shortest path to the target state, return the next action
-    def get_G2_nav_action_on_shoretest_path(self, current_state):
-        if current_state is None:
-            return None
-        current_structure_str = current_state.structure_str
-        nav_edges = self.get_G2_nav_edges(
-            self.first_state.structure_str, self.target_state.structure_str
-        )
-        if nav_edges is not None:
-            for start_structure_str, to_state_str, event in nav_edges:
-                if start_structure_str == current_structure_str:
-                    return event
-        self.logger.info("No next action found")
-        return None
-
-    def is_on_shortest_path(self, current_state):
-        if current_state is None:
-            return False
-        current_structure_str = current_state.structure_str
-        nav_edges = self.get_G2_nav_edges(
-            self.first_state.structure_str, self.target_state.structure_str
-        )
-        if nav_edges is not None:
-            for start_structure_str, to_state_str, event in nav_edges:
-                if start_structure_str == current_structure_str:
-                    return True
-        return False
-
-    def get_state_close_to_the_target(self, current_state):
-        if current_state is None:
-            return None
-        current_structure_str = current_state.structure_str
-        nav_edges = self.get_G2_nav_edges(
-            self.first_state.structure_str, self.target_state.structure_str
-        )
-        if nav_edges is not None:
-            for start_structure_str, to_state_str, event in nav_edges:
-                if start_structure_str == current_structure_str:
-                    return self.find_state_according_to_state_str(to_state_str)
-        return None
-
-    def get_simple_paths_to_target_state(self,state_str_or_structure):
-        # get all paths from source to target, and sort them according to the length
-        graph = None
-        first_state = None
-        target_state = None
-        if state_str_or_structure:
-            graph = self.G
-            first_state = self.first_state.state_str
-            target_state = self.target_state.state_str
-            if self.first_state_after_initialization:
-                first_state = self.first_state_after_initialization.state_str
-        else:
-            graph = self.G2
-            first_state = self.first_state.structure_str
-            target_state = self.target_state.structure_str
-            if self.first_state_after_initialization:
-                first_state = self.first_state_after_initialization.structure_str
-
-        paths = []
-        paths = nx.all_simple_paths(
-            graph,
-            source=first_state,
-            target=target_state,
-            cutoff=15,
-        )
-        paths = sorted(paths, key=lambda x: len(x))
-        nav_edges = []
-        for path in paths:
-            nav_edges.append(self.get_edges_from_path(path,state_str_or_structure))
-        return nav_edges
-
-    def get_paths_mutate_on_the_main_path(self,state_str_or_structure,number_of_meet_target=0):
-        graph = None
-        first_state = None
-        target = None
-        if state_str_or_structure:
-            graph = self.G
-            first_state = self.first_state.state_str
-            target = self.target_state.state_str
-            if self.first_state_after_initialization:
-                first_state = self.first_state_after_initialization.state_str
-        else:
-            graph = self.G2
-            first_state = self.first_state.structure_str
-            target = self.target_state.structure_str
-            if self.first_state_after_initialization:
-                first_state = self.first_state_after_initialization.structure_str
-        
-        paths = []
-        def dfs(node, path, edges, number_of_meet_target):
-            if len(path) > 10:
-                return
-            if node == target:
-                number_of_meet_target += 1
-                paths.append(path)
-                if number_of_meet_target == 1:
-                    for neighbor in graph.successors(node):
-                        if (node, neighbor) in edges:
-                            edges.remove((node, neighbor))
-                            dfs(
-                                neighbor,
-                                path + [neighbor],
-                                edges,
-                                number_of_meet_target,
-                            )
-                            edges.add((node, neighbor))
-                return
-            for neighbor in graph.successors(node):
-                if (node, neighbor) in edges:
-                    edges.remove((node, neighbor))
-                    dfs(neighbor, path + [neighbor], edges, number_of_meet_target)
-                    edges.add((node, neighbor))
-
-        edges = set(nx.edges(graph))
-        dfs(
-            first_state,
-            [first_state],
-            edges,
-            number_of_meet_target,
-        )
-        paths = sorted(paths, key=lambda x: len(x))
-        nav_edges = []
-        for path in paths:
-            edge = self.get_edges_from_path(path,state_str_or_structure)
-            if edge is not None:
-                nav_edges.append(edge)
-        return nav_edges
-
-    def get_edges_from_path(self, path,state_str_or_structure):
-        
-        graph = None
-        if state_str_or_structure:
-            graph = self.G
-        else:
-            graph = self.G2
-        if path is None:
-            return None
-        nav_edges = []
-        state_strs = path
-        if not isinstance(state_strs, list) or len(state_strs) < 2:
-            return None
-        start_state_structure_str = state_strs[0]
-        for state_str in state_strs[1:]:
-            edge = graph[start_state_structure_str][state_str]
-            edge_event_strs = list(edge["events"].keys())
-            if edge_event_strs is None or len(edge_event_strs) == 0:
-                print("edge_event_strs is none")
-                return None
-            # start_state = random.choice(self.G.nodes[start_state_str]['states'])
-            event_str = random.choice(edge_event_strs)
-            event = edge["events"][event_str]["event"]
-            nav_edges.append((start_state_structure_str, state_str, event))
-            start_state_structure_str = state_str
-        if nav_edges is None:
-            return None
-        return nav_edges
+   

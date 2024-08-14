@@ -365,6 +365,9 @@ class ExitEvent(InputEvent):
 
     def get_event_str(self, state):
         return "%s()" % self.__class__.__name__
+    
+    def get_event_name(self):
+        return "Exit"
 
 
 class KillAppEvent(InputEvent):
@@ -393,6 +396,8 @@ class KillAppEvent(InputEvent):
     def get_event_str(self, state):
         return "%s()" % self.__class__.__name__
 
+    def get_event_name(self):
+        return "KillApp"
 
 class KillAndRestartAppEvent(InputEvent):
     """
@@ -423,6 +428,10 @@ class KillAndRestartAppEvent(InputEvent):
 
     def get_event_str(self, state):
         return "%s()" % self.__class__.__name__
+    
+    def get_event_name(self):
+        return "KillAndRestartApp"
+
 
 class RotateDevice(InputEvent):
     def __init__(self):
@@ -438,6 +447,9 @@ class RotateDevice(InputEvent):
 
     def get_event_str(self, state):
         return "%s()" % self.__class__.__name__
+    
+    def get_event_name(self):
+        return "Rotate"
 
 class RotateDeviceRightEvent(RotateDevice):
     """
@@ -449,6 +461,9 @@ class RotateDeviceRightEvent(RotateDevice):
     def send(self, device):
         device.rotate_device_right()
         return True
+    
+    def get_event_name(self):
+        return "RotateRight"
 
 class RotateDeviceNeutralEvent(RotateDevice):
     """
@@ -461,6 +476,10 @@ class RotateDeviceNeutralEvent(RotateDevice):
         device.rotate_device_neutral()
         return True
     
+    def get_event_name(self):
+        return "RotateNeutral"
+    
+
 class KeyEvent(InputEvent):
     """
     a key pressing event
@@ -488,6 +507,9 @@ class KeyEvent(InputEvent):
             state.state_str,
             self.name,
         )
+    
+    def get_event_name(self):
+        return self.name
 
 #  restart event
 class ReInstallAppEvent(InputEvent):
@@ -528,6 +550,9 @@ class ReInstallAppEvent(InputEvent):
 
     def get_event_str(self, state, content_free=False):
         return "%s()" % self.__class__.__name__
+    
+    def get_event_name(self):
+        return "ReInstallApp"
     
 class UIEvent(InputEvent):
     """
@@ -623,6 +648,8 @@ class TouchEvent(UIEvent):
     def get_views(self):
         return [self.view] if self.view else []
 
+    def get_event_name(self):
+        return "Click"
 
 class LongTouchEvent(UIEvent):
     """
@@ -667,6 +694,8 @@ class LongTouchEvent(UIEvent):
     def get_views(self):
         return [self.view] if self.view else []
 
+    def get_event_name(self):
+        return "LongClick"
 
 class SwipeEvent(UIEvent):
     """
@@ -752,6 +781,8 @@ class SwipeEvent(UIEvent):
             views.append(self.end_view)
         return views
 
+    def get_event_name(self):
+        return self.get_event_str()
 
 class ScrollEvent(UIEvent):
     """
@@ -833,7 +864,8 @@ class ScrollEvent(UIEvent):
     def get_views(self):
         return [self.view] if self.view else []
 
-
+    def get_event_name(self):
+        return "Scroll "+self.direction
 
 class SetTextEvent(UIEvent):
     """
@@ -882,6 +914,9 @@ class SetTextEvent(UIEvent):
     def set_text(self, text):
         self.text = text
 
+    def get_event_name(self):
+        return "SetText "+self.text
+
 class SearchEvent(InputEvent):
     """
     use the uiautomator2's search method
@@ -904,6 +939,9 @@ class SearchEvent(InputEvent):
 
     def get_event_str(self, state):
         return "%s(time=%s)" % (self.__class__.__name__, self.time)
+    
+    def get_event_name(self):
+        return "Search"
 
 class SetTextAndSearchEvent(InputEvent):
     """
@@ -928,6 +966,10 @@ class SetTextAndSearchEvent(InputEvent):
 
     def get_event_str(self, state):
         return "%s(text=%s)" % (self.__class__.__name__, self.text)
+    
+    def get_event_name(self):
+        return "SetTextAndSearch "+self.text
+    
 class IntentEvent(InputEvent):
     """
     An event describing an intent
@@ -959,6 +1001,8 @@ class IntentEvent(InputEvent):
     def get_event_str(self, state):
         return "%s(intent='%s')" % (self.__class__.__name__, self.intent)
 
+    def get_event_name(self):
+        return "%s" % self.intent
 
 class SpawnEvent(InputEvent):
     """

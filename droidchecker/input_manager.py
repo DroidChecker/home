@@ -25,11 +25,11 @@ from .input_policy import (
     POLICY_NONE,
 )
 
-DEFAULT_POLICY = POLICY_GREEDY_DFS
+DEFAULT_POLICY = POLICY_RANDOM
 RANDOM_POLICY = POLICY_RANDOM
 DEFAULT_EVENT_INTERVAL = 1
 DEFAULT_EVENT_COUNT = 100000000
-DEFAULT_TIMEOUT = -1
+DEFAULT_TIMEOUT = 3600
 
 
 class UnknownInputException(Exception):
@@ -106,27 +106,12 @@ class InputManager(object):
             input_policy = None
         elif self.policy_name == POLICY_MONKEY:
             input_policy = None
-        elif self.policy_name in [POLICY_NAIVE_DFS, POLICY_NAIVE_BFS]:
-            input_policy = UtgNaiveSearchPolicy(
-                device, app, self.random_input, self.policy_name
-            )
-        elif self.policy_name == POLICY_BUILD_MODEL:
-            input_policy = BuildModelPolicy(
-                device,
-                app,
-                self.random_input,
-                self.policy_name,
-                self.android_check,
-                self.guide,
-                self.build_model_timeout
-            )
         elif self.policy_name == POLICY_MUTATE:
             input_policy = MutatePolicy(
                 device,
                 app,
                 self.random_input,
                 self.android_check,
-                self.guide,
                 main_path=self.main_path,
                 run_initial_rules_after_every_mutation = self.run_initial_rules_after_every_mutation
             )
@@ -136,16 +121,8 @@ class InputManager(object):
             input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, restart_app_after_check_property=True)
         elif self.policy_name == POLICY_RANDOM_100:
             input_policy = UtgRandomPolicy(device, app, random_input=self.random_input,android_check=self.android_check, clear_and_restart_app_data_after_100_events=True)
-        elif self.policy_name == POLICY_MUTATE_MAIN_PATH:
-            input_policy = Mutate_Main_Path_Policy(device,app,random_input=self.random_input,android_check=self.android_check,restart_app_after_100_events=True)
-        elif self.policy_name == POLICY_MIX_RANDOM_MUTATE:
-            input_policy = Mix_random_and_mutate_policy(device,app,random_input=self.random_input,android_check=self.android_check,restart_app_after_100_events=True)
-        elif self.policy_name == POLICY_MEMORY_GUIDED:
-            from .input_policy2 import MemoryGuidedPolicy
-
-            input_policy = MemoryGuidedPolicy(device, app, self.random_input)
         elif self.policy_name == POLICY_RANDOM:
-            input_policy = UtgRandomPolicy(device, app, guide=self.guide)
+            input_policy = UtgRandomPolicy(device, app)
         else:
             self.logger.warning(
                 "No valid input policy specified. Using policy \"none\"."

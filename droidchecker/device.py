@@ -5,7 +5,7 @@ import subprocess
 import sys
 import time
 import uiautomator2
-
+import pkg_resources
 from .adapter.uiautomator2_helper import Uiautomator2_Helper
 
 from .adapter.adb import ADB
@@ -121,8 +121,10 @@ class Device(object):
             self.logger.info("disable minicap on emulator")
             self.adapters[self.minicap] = False
 
-        self.resource_path = "Document"
-
+        # self.resource_path = "Document"
+        self.resource_path = pkg_resources.resource_filename(
+                "droidchecker", "resources/Document"
+            )
     def check_connectivity(self):
         """
         check if the device is available

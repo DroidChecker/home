@@ -14,22 +14,16 @@ from typing import (
 import traceback
 import attr
 import uiautomator2 as u2
-from droidbot import env_manager, input_manager
-from droidbot.droidbot import DroidBot
+from droidchecker import env_manager, input_manager
+from droidchecker.droidbot import DroidBot
 import inspect
 from copy import copy
 from uiautomator2.exceptions import UiObjectNotFoundError
-
 import time
-
-
-from hypothesis import given, strategies as st
 from hypothesis.errors import NonInteractiveExampleWarning
 import warnings
 
 warnings.filterwarnings("ignore", category=NonInteractiveExampleWarning)
-# from uiobject import MyUiObject
-
 
 RULE_MARKER = "tool_rule"
 INITIALIZE_RULE_MARKER = "tool_initialize_rule"
@@ -75,6 +69,7 @@ def precondition(precond: Callable[[Any], bool]) -> Callable:
         return precondition_wrapper
 
     return accept
+
 
 def initialize():
     '''
@@ -266,13 +261,6 @@ class AndroidCheck(object):
                 rules_without_preconditions.append(rule_to_check)
         return rules_without_preconditions
 
-    # def execute_method_by_lines(self, method):
-    #     source = inspect.getsource(method)
-    #     lines = source.splitlines()
-    #     for line in lines:
-    #         # exec(line, method.__globals__)
-    #         print("executing line: ", line)
-
     def teardown(self):
         """Called after a run has finished executing to clean up any necessary
         state.
@@ -280,7 +268,52 @@ class AndroidCheck(object):
         """
         ...
 
+
+from uiautomator2._selector import Selector, UiObject
+from uiautomator2 import Device
+
+
+class Mobile(Device):
     
+    def __init__(self,serial, delay=1) -> None:
+        super().__init__(serial=serial)
+        self.delay = delay
+
+    def __call__(self, **kwargs: Any) -> Any:
+        return Ui(self, Selector(**kwargs))
+
+    def rotate(self, mode: str):
+        super().set_orientation(mode)
+        time.sleep(self.delay)
+
+    def press(self, key: Union[int, str], meta=None):
+        super().press(key, meta)
+        time.sleep(self.delay)
 
 
-# t = AndroidCheck("droidbot\\apk\\amaze_3.4.3.apk").start()
+class Ui(UiObject):
+
+    def click(self, timeout=None, offset=None):
+        super().click(timeout, offset)
+        time.sleep(self.session.delay)
+
+    def long_click(self, duration: float = 0.5, timeout=None):
+        super().long_click(duration, timeout)
+        time.sleep(self.session.delay)
+    
+    def set_text(self, text, timeout=None):
+        super().set_text(text, timeout)
+        time.sleep(self.session.delay)
+
+    def child(self, **kwargs):
+        return Ui(self.session, self.selector.clone().child(**kwargs))
+    
+    def sibling(self, **kwargs):
+        return Ui(self.session, self.selector.clone().sibling(**kwargs))
+    
+    
+d = Mobile(serial="emulator-5554")
+
+
+
+

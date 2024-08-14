@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 class Uiautomator2_Helper:
     def __init__(self, device=None):
         if device is None:
-            from droidbot.device import Device
+            from droidchecker.device import Device
 
             device = Device()
         self.device: Device = device
