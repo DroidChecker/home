@@ -4,9 +4,9 @@ import os
 
 setup(
     name='droidchecker',
-    packages=find_packages(include=['droidbot', 'droidbot.adapter']),
+    packages=find_packages(include=['droidchecker']),
     # this must be the same as the name above
-    version='1.0.2b4',
+    version='1.0.0',
     description='A lightweight UI-guided test input generator for Android.',
     author='Yuanchun Li',
     license='MIT',
