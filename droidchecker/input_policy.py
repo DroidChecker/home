@@ -1,3 +1,4 @@
+import os
 import string
 import sys
 import json
@@ -30,7 +31,10 @@ from .input_event import (
 )
 from hypothesis import given, strategies as st
 from .utg import UTG
-
+from droidchecker import utils
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .input_manager import InputManager
 # Max number of restarts
 MAX_NUM_RESTARTS = 5
 # Max number of steps outside the app
@@ -196,10 +200,11 @@ class UtgBasedInputPolicy(InputPolicy):
         if self.device.humanoid is not None:
             self.humanoid_view_trees = []
             self.humanoid_events = []
-        rules = self.android_check.rules()
+        rules = self.android_check._rules_per_class
         self.rules = {}
-        for rule in rules:
-            self.rules[rule.function.__name__] = {"#satisfy pre": 0, "#check property": 0, "#trigger the bug": 0}
+        for classname in rules:
+            for rule in rules[classname]:
+                self.rules[rule.function.__name__] = {"#satisfy pre": 0, "#check property": 0, "#trigger the bug": 0}
         # record the action count, time and property name when the bug is triggered
         self.triggered_bug_information = []
 
@@ -312,6 +317,15 @@ class UtgBasedInputPolicy(InputPolicy):
         """
         
         """
+        # mark the bug information on the bug report html
+        if len(self.triggered_bug_information) > 0:
+            bug_report_path = os.path.join(self.device.output_dir, "every_states")
+            utils.generate_report(
+                bug_report_path,
+                bug_report_path,
+                0,
+                self.triggered_bug_information
+            )
         self.logger.info("----------------------------------------")
 
         if len(self.triggered_bug_information) > 0:
@@ -351,7 +365,7 @@ class MutatePolicy(UtgBasedInputPolicy):
     def __init__(self, device, app, random_input, android_check=None, main_path=None,
                  run_initial_rules_after_every_mutation=True):
         super(MutatePolicy, self).__init__(
-            device, app, random_input, android_check, guide
+            device, app, random_input, android_check
         )
         self.logger = logging.getLogger(self.__class__.__name__)
         self.list_main_path = []
@@ -852,7 +866,8 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
             return KeyEvent(name="BACK")
 
         self.__update_utg()
-
+        self.last_state = self.current_state
+        
         if self.action_count % self.number_of_events_that_restart_app == 0 and self.clear_and_restart_app_data_after_100_events:
             self.logger.info("clear and restart app after %s events" % self.number_of_events_that_restart_app)
             return ReInstallAppEvent(self.app)

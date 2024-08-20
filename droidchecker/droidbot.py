@@ -49,9 +49,7 @@ class DroidBot(object):
         ignore_ad=False,
         replay_output=None,
         android_check=None,
-        guide=None,
         main_path=None,
-        build_model_timeout=-1,
         number_of_events_that_restart_app=100,
         run_initial_rules_after_every_mutation=True
     ):
@@ -97,7 +95,6 @@ class DroidBot(object):
 
         self.enabled = True
         self.android_check = android_check
-        self.guide = guide
         try:
             self.app = App(app_path, output_dir=self.output_dir)
             self.device = Device(
@@ -129,9 +126,7 @@ class DroidBot(object):
                 master=master,
                 replay_output=replay_output,
                 android_check=android_check,
-                guide=self.guide,
                 main_path=main_path,
-                build_model_timeout=build_model_timeout,
                 number_of_events_that_restart_app=number_of_events_that_restart_app,
                 run_initial_rules_after_every_mutation=run_initial_rules_after_every_mutation
             )

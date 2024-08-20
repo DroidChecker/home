@@ -836,7 +836,7 @@ class Device(object):
 
     def mkdir(self,path):
         self.adb.run_cmd(["shell","mkdir",path])
-    def take_screenshot(self):
+    def take_screenshot(self, remove_to_every_states=False, event_name = None):
         # image = None
         #
         # received = self.adb.shell("screencap -p").replace("\r\n", "\n")
@@ -873,7 +873,42 @@ class Device(object):
             self.pull_file(remote_image_path, local_image_path)
             self.adb.shell("rm %s" % remote_image_path)
 
+        if remove_to_every_states:
+            # 这里主要是为了在property中每一个UI 事件之后将截图移动到every_states文件夹中
+            self.remove_screenshot_to_every_states(local_image_path, event_name)
+
         return local_image_path
+
+    def remove_screenshot_to_every_states(self,local_image_path, event_name):
+        # 首先便利every_States文件夹，获取最新png文件的名称。
+        # 然后将当前的截图移动到这个文件夹中，并且重命名为最新的png文件的名称
+        import shutil
+        every_states_dir = os.path.join(self.output_dir, "every_states")
+        if not os.path.exists(every_states_dir):
+            os.makedirs(every_states_dir)
+        # 获取every_states文件夹中最新的png文件
+        files = os.listdir(every_states_dir)
+        files = [f for f in files if f.endswith(".png")]
+        files.sort(key=lambda x: os.path.getmtime(os.path.join(every_states_dir,x)))
+        if len(files) > 0:
+            latest_file = files[-1]
+            num_start = latest_file.find("_")
+            num_end = latest_file.find("_", num_start + 1)    
+            if num_end == -1:
+                num_end = latest_file.find(".png")
+            event_index = str(latest_file[num_start+1:num_end])
+            if "." in event_index:
+                suffix = str(event_index.split(".")[1])
+                event_index = event_index.split(".")[0] + "." + str(int(suffix) + 1)
+            else:
+                event_index = str(event_index+ ".1")
+            new_file_suffix = event_index + "_" + event_name
+            dest_file = "%s/%s" % (every_states_dir, "screen_%s.png" % new_file_suffix)
+            shutil.move(local_image_path, dest_file)
+        else:
+            dest_file = "%s/%s" % (every_states_dir, "screen_1_%s.png" % event_name)
+            shutil.move(local_image_path, dest_file)
+        
 
     def get_current_state(self, action_count=None):
         self.logger.debug("getting current device state...")

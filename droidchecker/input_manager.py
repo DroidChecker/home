@@ -30,7 +30,7 @@ RANDOM_POLICY = POLICY_RANDOM
 DEFAULT_EVENT_INTERVAL = 1
 DEFAULT_EVENT_COUNT = 100000000
 DEFAULT_TIMEOUT = 3600
-
+DEFAULT_DEVICE_SERIAL = "emulator-5554"
 
 class UnknownInputException(Exception):
     pass
@@ -54,9 +54,7 @@ class InputManager(object):
         master=None,
         replay_output=None,
         android_check=None,
-        guide=None,
         main_path=None,
-        build_model_timeout=-1,
         number_of_events_that_restart_app=100,
         run_initial_rules_after_every_mutation=True
     ):
@@ -93,11 +91,9 @@ class InputManager(object):
             self.script = DroidBotScript(script_dict)
 
         self.android_check = android_check
-        self.guide = guide
         self.main_path = main_path
         
         self.profiling_method = profiling_method
-        self.build_model_timeout = build_model_timeout
         self.number_of_events_that_restart_app = number_of_events_that_restart_app
         self.policy = self.get_input_policy(device, app, master)
 

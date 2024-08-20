@@ -1,5 +1,7 @@
+import importlib
 import os
 import random
+import sys
 from typing import (
     Any,
     Callable,
@@ -22,14 +24,14 @@ from uiautomator2.exceptions import UiObjectNotFoundError
 import time
 from hypothesis.errors import NonInteractiveExampleWarning
 import warnings
-
+from dataclasses import dataclass
+from droidchecker.uiautomar_dsl import Mobile
 warnings.filterwarnings("ignore", category=NonInteractiveExampleWarning)
 
 RULE_MARKER = "tool_rule"
 INITIALIZE_RULE_MARKER = "tool_initialize_rule"
 PRECONDITIONS_MARKER = "tool_preconditions"
 INVARIANT_MARKER = "tool_invariant"
-
 
 @attr.s()
 class Rule:
@@ -89,77 +91,85 @@ def initialize():
 
     return accept
 
+@dataclass
+class Setting:
+    apk_path: str
+    device_serial: str ="emulator-5554"
+    output_dir:str ="output"
+    main_path: str =None
+    is_emulator: bool =True
+    policy_name: str =input_manager.DEFAULT_POLICY
+    random_input: bool =True
+    script_path: str=None
+    event_interval: int=input_manager.DEFAULT_EVENT_INTERVAL
+    timeout: int =input_manager.DEFAULT_TIMEOUT
+    event_count: int=input_manager.DEFAULT_EVENT_COUNT
+    cv_mode=None
+    debug_mode=None
+    keep_app=None
+    keep_env=None
+    profiling_method=None
+    grant_perm=True
+    send_document=True
+    enable_accessibility_hard=None
+    master=None
+    humanoid=None
+    ignore_ad=None
+    replay_output=None
+    number_of_events_that_restart_app:int =100
+    run_initial_rules_after_every_mutation=True
+
+OUTPUT_DIR = "output"
+d = Mobile()
+
+def run_android_check_as_test(android_check_class, settings = None):
+    if settings is None:
+        settings = android_check_class.TestCase.settings
+    
+    def run_android_check(android_check_class):
+        
+        droid = DroidBot(
+            app_path=settings.apk_path,
+            device_serial=settings.device_serial,
+            is_emulator=settings.is_emulator,
+            output_dir=settings.output_dir,
+            env_policy=env_manager.POLICY_NONE,
+            policy_name=settings.policy_name,
+            random_input=settings.random_input,
+            script_path=settings.script_path,
+            event_interval=settings.event_interval,
+            timeout=settings.timeout,
+            event_count=settings.event_count,
+            cv_mode=settings.cv_mode,
+            debug_mode=settings.debug_mode,
+            keep_app=settings.keep_app,
+            keep_env=settings.keep_env,
+            profiling_method=settings.profiling_method,
+            grant_perm=settings.grant_perm,
+            send_document=settings.send_document,
+            enable_accessibility_hard=settings.enable_accessibility_hard,
+            master=settings.master,
+            humanoid=settings.humanoid,
+            ignore_ad=settings.ignore_ad,
+            replay_output=settings.replay_output,
+            android_check=android_check_class,
+            main_path=settings.main_path,
+            number_of_events_that_restart_app=settings.number_of_events_that_restart_app,
+            run_initial_rules_after_every_mutation=settings.run_initial_rules_after_every_mutation
+        )
+        global d
+        d.set_device_serial(settings.device_serial)
+        d.set_droidbot(droid)
+        droid.start()
+    run_android_check(android_check_class)
 
 class AndroidCheck(object):
     _rules_per_class: Dict[type, List[classmethod]] = {}
     _initializers_per_class: Dict[type, List[classmethod]] = {}
 
     def __init__(
-        self,
-        apk_path,
-        device_serial="emulator-5554",
-        output_dir="output",
-        main_path=None,
-        is_emulator=True,
-        policy_name=input_manager.DEFAULT_POLICY,
-        random_input=True,
-        script_path=None,
-        event_interval=input_manager.DEFAULT_EVENT_INTERVAL,
-        timeout=input_manager.DEFAULT_TIMEOUT,
-        event_count=input_manager.DEFAULT_EVENT_COUNT,
-        cv_mode=None,
-        debug_mode=None,
-        keep_app=None,
-        keep_env=None,
-        profiling_method=None,
-        grant_perm=True,
-        send_document=True,
-        enable_accessibility_hard=None,
-        master=None,
-        humanoid=None,
-        ignore_ad=None,
-        replay_output=None,
-        build_model_timeout=-1,
-        number_of_events_that_restart_app=100,
-        run_initial_rules_after_every_mutation=True
+        self
     ):
-        self.apk_path = apk_path
-        self.device_serial = device_serial
-        
-        self.droidbot = DroidBot(
-            app_path=apk_path,
-            device_serial=device_serial,
-            is_emulator=is_emulator,
-            output_dir=output_dir,
-            env_policy=env_manager.POLICY_NONE,
-            policy_name=policy_name,
-            random_input=random_input,
-            script_path=script_path,
-            event_interval=event_interval,
-            timeout=timeout,
-            event_count=event_count,
-            cv_mode=cv_mode,
-            debug_mode=debug_mode,
-            keep_app=keep_app,
-            keep_env=keep_env,
-            profiling_method=profiling_method,
-            grant_perm=grant_perm,
-            send_document=send_document,
-            enable_accessibility_hard=enable_accessibility_hard,
-            master=master,
-            humanoid=humanoid,
-            ignore_ad=ignore_ad,
-            replay_output=replay_output,
-            android_check=self,
-            main_path=main_path,
-            build_model_timeout=build_model_timeout,
-            number_of_events_that_restart_app=number_of_events_that_restart_app,
-            run_initial_rules_after_every_mutation=run_initial_rules_after_every_mutation
-        )
-        self.device = u2.connect(self.device_serial)
-        # disable keyboard
-        self.device.set_fastinput_ime(True)
-        self.device.implicitly_wait(5)  # set default element wait timeout = 5 seconds
         self._initialize_rules_to_run = copy(self.initialize_rules())
         if not self.rules():
             raise Exception(f"Type {type(self).__name__} defines no rules")
@@ -183,7 +193,7 @@ class AndroidCheck(object):
         for _, v in inspect.getmembers(cls):
             r = getattr(v, INITIALIZE_RULE_MARKER, None)
             if r is not None:
-                cls._initializers_per_class[cls].append(r)
+                cls._initializers_per_class[cls].append(r)       
         return cls._initializers_per_class[cls]
 
     @classmethod
@@ -246,19 +256,23 @@ class AndroidCheck(object):
         '''Check all rules and return the list of rules that meet the preconditions.'''
         rules_to_check = self.rules()
         rules_meeting_preconditions = []
-        for rule_to_check in rules_to_check:
-            if len(rule_to_check.preconditions) > 0:
-                if all(precond(self) for precond in rule_to_check.preconditions):
-                    rules_meeting_preconditions.append(rule_to_check)
+        for class_name in self._rules_per_class:
+            rules_to_check = self._rules_per_class[class_name]
+            for rule_to_check in rules_to_check:
+                if len(rule_to_check.preconditions) > 0:
+                    if all(precond(self) for precond in rule_to_check.preconditions):
+                        rules_meeting_preconditions.append(rule_to_check)
         return rules_meeting_preconditions
 
     def get_rules_without_preconditions(self):
         '''Return the list of rules that do not have preconditions.'''
         rules_to_check = self.rules()
         rules_without_preconditions = []
-        for rule_to_check in rules_to_check:
-            if len(rule_to_check.preconditions) == 0:
-                rules_without_preconditions.append(rule_to_check)
+        for class_name in self._rules_per_class:
+            rules_to_check = self._rules_per_class[class_name]
+            for rule_to_check in rules_to_check:
+                if len(rule_to_check.preconditions) == 0:
+                    rules_without_preconditions.append(rule_to_check)
         return rules_without_preconditions
 
     def teardown(self):
@@ -267,53 +281,3 @@ class AndroidCheck(object):
         Does nothing by default.
         """
         ...
-
-
-from uiautomator2._selector import Selector, UiObject
-from uiautomator2 import Device
-
-
-class Mobile(Device):
-    
-    def __init__(self,serial, delay=1) -> None:
-        super().__init__(serial=serial)
-        self.delay = delay
-
-    def __call__(self, **kwargs: Any) -> Any:
-        return Ui(self, Selector(**kwargs))
-
-    def rotate(self, mode: str):
-        super().set_orientation(mode)
-        time.sleep(self.delay)
-
-    def press(self, key: Union[int, str], meta=None):
-        super().press(key, meta)
-        time.sleep(self.delay)
-
-
-class Ui(UiObject):
-
-    def click(self, timeout=None, offset=None):
-        super().click(timeout, offset)
-        time.sleep(self.session.delay)
-
-    def long_click(self, duration: float = 0.5, timeout=None):
-        super().long_click(duration, timeout)
-        time.sleep(self.session.delay)
-    
-    def set_text(self, text, timeout=None):
-        super().set_text(text, timeout)
-        time.sleep(self.session.delay)
-
-    def child(self, **kwargs):
-        return Ui(self.session, self.selector.clone().child(**kwargs))
-    
-    def sibling(self, **kwargs):
-        return Ui(self.session, self.selector.clone().sibling(**kwargs))
-    
-    
-d = Mobile(serial="emulator-5554")
-
-
-
-

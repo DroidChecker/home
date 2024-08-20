@@ -95,9 +95,18 @@ def safe_get_dict(view_dict, key, default=None):
     return view_dict[key] if (key in view_dict) else default
 
 
-def generate_report(img_path, html_path, run_count):
+def generate_report(img_path, html_path, run_count, bug_information=None):
     '''Generate report for the test based on the executed events'''
     line_list = []
+    
+    bug_link_list = []
+    # user can click to jump to the corresponding event, contains the event index of each bug
+    bug_set = set()
+    if bug_information is not None:
+        for bug in bug_information:
+            bug_link = ( "<li><a href=\"#"+str(bug[0])+"\">"+str(bug[0])+"</a></li>" + '\n')
+            bug_link_list.append(bug_link)
+            bug_set.add(bug[0])
     f_html = open(
         os.path.join(html_path, str(run_count) + "_trace.html"), 'w', encoding='utf-8'
     )
@@ -111,11 +120,14 @@ def generate_report(img_path, html_path, run_count):
         img_list, key=lambda x: os.path.getmtime(os.path.join(img_path, x))
     )
     new_str = "<ul id=\"menu\">" + '\n'
+    new_bug_str = ""
     for img_file in sorted_img_list:
         if ".png" in img_file:
             
             num_start = img_file.find("_")
             num_end = img_file.find("_", num_start + 1)    
+            if num_end == -1:
+                num_end = img_file.find(".png")
             state_num = 1
             action_count = img_file[num_start + 1 : num_end]
             event_name_end = img_file.find(".png")
@@ -129,26 +141,34 @@ def generate_report(img_path, html_path, run_count):
                     + "</p></li>"
                     + '\n'
                 )
-            else:
-                line = (
-                    "      <li><img src=\""
-                    + "../"
-                    + str(run_count)
-                    + "/screen/"
-                    + img_file
-                    + "\" class=\"img\"><p>"
-                    + action_count
-                    + "</p></li>"
-                    + '\n'
-                )
+                if bug_information is not None:
+                    if "." not in action_count and int(action_count) in bug_set:
+                        line = (
+                            "      <li><img src=\""
+                            + img_file
+                            + "\" class=\"img\""
+                            + " id=\""
+                            + action_count
+                            + "\">"
+                            +"<p>"
+                            + action_count+ " " + event_name
+                            + "</p></li>"
+                            + '\n'
+                        )             
             line_list.append((float(state_num), line))
-    # line_list.sort()
     for item in line_list:
         new_str = new_str + item[1]
+    for item in bug_link_list:
+        new_bug_str = new_bug_str + item
     new_str = new_str + "   </ul>"
     old_str = "<ul id=\"menu\"></ul>"
+    old_bug_str = "bug_link"
     for line in f_style:
+        if bug_information is not None and "<ul>bug_link</ul>" in line:
+            f_html.write(re.sub(old_bug_str,new_bug_str,line))
+            continue
         f_html.write(re.sub(old_str, new_str, line))
+        
 
 class Time(object):
     def __init__(self):
