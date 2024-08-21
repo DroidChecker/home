@@ -1,17 +1,10 @@
-import importlib
-import os
+import logging
 import random
-import sys
 from typing import (
     Any,
     Callable,
     Dict,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    Union,
-    overload,
+    List
 )
 import traceback
 import attr
@@ -25,7 +18,7 @@ import time
 from hypothesis.errors import NonInteractiveExampleWarning
 import warnings
 from dataclasses import dataclass
-from droidchecker.uiautomar_dsl import Mobile
+from droidchecker.dsl import Mobile
 warnings.filterwarnings("ignore", category=NonInteractiveExampleWarning)
 
 RULE_MARKER = "tool_rule"
@@ -109,8 +102,8 @@ class Setting:
     keep_app=None
     keep_env=None
     profiling_method=None
-    grant_perm=True
-    send_document=True
+    grant_perm: bool=True
+    send_document: bool=True
     enable_accessibility_hard=None
     master=None
     humanoid=None
@@ -175,6 +168,7 @@ class AndroidCheck(object):
             raise Exception(f"Type {type(self).__name__} defines no rules")
         self.current_rule = None
         self.execute_event = None
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def start(self):
         try:
@@ -242,10 +236,22 @@ class AndroidCheck(object):
             result = rule.function(self)
             time.sleep(1)
         except UiObjectNotFoundError as e:
-            print("Could not find the UI object. "+str(e))
+            self.logger.warning("Could not find the UI object. "+str(e))
+            import traceback
+            tb = traceback.extract_tb(e.__traceback__)
+    
+            # 找到最后一个回溯信息，即在 `rule.function` 内部的错误
+            last_call = tb[1]
+            line_number = last_call.lineno
+            file_name = last_call.filename
+            code_context = last_call.line.strip()
+
+            # 打印出错误行号和代码内容
+            print(f"Error occurred in file {file_name} on line {line_number}:")
+            print(f"Code causing the error: {code_context}")
             return 2
         except AssertionError as e:
-            print("Assertion error. "+str(e))
+            self.logger.error("Assertion error. "+str(e))
             return 0
         finally:
             result = 1
