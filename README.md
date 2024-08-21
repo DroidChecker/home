@@ -168,6 +168,13 @@ def pass_welcome_pages(self):
 
 The, after testing started, this function will be executed first to pass the welcome page.
 
+### Run multiple properties together
+Suppose we have several properties in different files, we can run them together by specifying multiple files in the command line.
+
+```bash
+droidchecker -f [property_file_name1] [property_file_name2] -a [apk_file_name]
+```
+
 # Acknowledgement
 
 1. [droidbot](https://github.com/honeynet/droidbot)
