@@ -70,12 +70,12 @@ A property in DroiodChecker consists of three parts: A function that looks like 
 Here is an example of a property:
 
 ```python
-    @precondition(lambda self: d(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").exists())
-    @rule()
-    def search_bar_should_exist_after_rotation(self):
-        d.rotate('l')
-        d.rotate('n')
-        assert d(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").exists() 
+@precondition(lambda self: d(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").exists())
+@rule()
+def search_bar_should_exist_after_rotation(self):
+    d.rotate('l')
+    d.rotate('n')
+    assert d(resourceId="it.feio.android.omninotes.alpha:id/search_src_text").exists() 
 ```
 
 This is an example property from OmniNotes. The property checks if the search exists after rotating the device. The property is defined as a function `search_bar_should_exist_after_rotation`. The function contains the test logic. The `@rule` decorator specifies this function as a property.
@@ -159,8 +159,10 @@ For example, in OmniNotes, we can use ``@initialize`` to specify a function and 
 ```python
 @initialize()
 def pass_welcome_pages(self):
+    # click next button 5 times
     for _ in range(5):
         d(resourceId="it.feio.android.omninotes.alpha:id/next").click()
+    # click done button
     d(resourceId="it.feio.android.omninotes.alpha:id/done").click()
 ```
 
