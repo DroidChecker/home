@@ -57,8 +57,12 @@ class DroidBot(object):
         initiate droidbot with configurations
         :return:
         """
-        logging.basicConfig(level=logging.DEBUG if debug_mode else logging.INFO,format='%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+        if debug_mode:
+            
+            logging.basicConfig(level=logging.DEBUG,format='%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+        else:
+            logging.basicConfig(level= logging.INFO)
 
         self.logger = logging.getLogger('DroidBot')
         DroidBot.instance = self
