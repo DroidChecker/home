@@ -95,7 +95,7 @@ def safe_get_dict(view_dict, key, default=None):
     return view_dict[key] if (key in view_dict) else default
 
 
-def generate_report(img_path, html_path, run_count, bug_information=None):
+def generate_report(img_path, html_path, bug_information=None):
     '''Generate report for the test based on the executed events'''
     line_list = []
     
@@ -108,7 +108,7 @@ def generate_report(img_path, html_path, run_count, bug_information=None):
             bug_link_list.append(bug_link)
             bug_set.add(bug[0])
     f_html = open(
-        os.path.join(html_path, str(run_count) + "_trace.html"), 'w', encoding='utf-8'
+        os.path.join(html_path,  "bug_report.html"), 'w', encoding='utf-8'
     )
     f_style = pkg_resources.resource_filename(
                 "droidchecker", "resources/style/style.html"
@@ -132,29 +132,29 @@ def generate_report(img_path, html_path, run_count, bug_information=None):
             action_count = img_file[num_start + 1 : num_end]
             event_name_end = img_file.find(".png")
             event_name = img_file[num_end + 1 : event_name_end]
-            if img_path == html_path:
-                line = (
-                    "      <li><img src=\""
-                    + img_file
-                    + "\" class=\"img\"><p>"
-                    + action_count+ " " + event_name
-                    + "</p></li>"
-                    + '\n'
-                )
-                if bug_information is not None:
-                    if "." not in action_count and int(action_count) in bug_set:
-                        line = (
-                            "      <li><img src=\""
-                            + img_file
-                            + "\" class=\"img\""
-                            + " id=\""
-                            + action_count
-                            + "\">"
-                            +"<p>"
-                            + action_count+ " " + event_name
-                            + "</p></li>"
-                            + '\n'
-                        )             
+            img_file = os.path.join("every_states", img_file)
+            line = (
+                "      <li><img src=\""
+                + img_file
+                + "\" class=\"img\"><p>"
+                + action_count+ " " + event_name
+                + "</p></li>"
+                + '\n'
+            )
+            if bug_information is not None:
+                if "." not in action_count and int(action_count) in bug_set:
+                    line = (
+                        "      <li><img src=\""
+                        + img_file
+                        + "\" class=\"img\""
+                        + " id=\""
+                        + action_count
+                        + "\">"
+                        +"<p>"
+                        + action_count+ " " + event_name
+                        + "</p></li>"
+                        + '\n'
+                    )             
             line_list.append((float(state_num), line))
     for item in line_list:
         new_str = new_str + item[1]
@@ -165,9 +165,11 @@ def generate_report(img_path, html_path, run_count, bug_information=None):
     old_bug_str = "bug_link"
     for line in f_style:
         if bug_information is not None and "<ul>bug_link</ul>" in line:
-            f_html.write(re.sub(old_bug_str,new_bug_str,line))
+            # f_html.write(re.sub(old_bug_str,new_bug_str,line))
+            f_html.write(line.replace(old_bug_str, new_bug_str))
             continue
-        f_html.write(re.sub(old_str, new_str, line))
+        # f_html.write(re.sub(old_str, new_str, line))
+        f_html.write(line.replace(old_str, new_str))
         
 
 class Time(object):

@@ -98,7 +98,7 @@ class Setting:
     timeout: int =input_manager.DEFAULT_TIMEOUT
     event_count: int=input_manager.DEFAULT_EVENT_COUNT
     cv_mode=None
-    debug_mode=None
+    debug_mode: bool=False
     keep_app=None
     keep_env=None
     profiling_method=None
@@ -236,7 +236,7 @@ class AndroidCheck(object):
             result = rule.function(self)
             time.sleep(1)
         except UiObjectNotFoundError as e:
-            self.logger.warning("Could not find the UI object. "+str(e))
+            self.logger.info("Could not find the UI object.")
             import traceback
             tb = traceback.extract_tb(e.__traceback__)
     
@@ -247,8 +247,8 @@ class AndroidCheck(object):
             code_context = last_call.line.strip()
 
             # 打印出错误行号和代码内容
-            print(f"Error occurred in file {file_name} on line {line_number}:")
-            print(f"Code causing the error: {code_context}")
+            self.logger.info(f"Error occurred in file {file_name} on line {line_number}:")
+            self.logger.info(f"Code causing the error: {code_context}")
             return 2
         except AssertionError as e:
             self.logger.error("Assertion error. "+str(e))

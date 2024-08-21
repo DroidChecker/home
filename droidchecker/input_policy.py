@@ -33,6 +33,7 @@ from hypothesis import given, strategies as st
 from .utg import UTG
 from droidchecker import utils
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from .input_manager import InputManager
 # Max number of restarts
@@ -211,7 +212,7 @@ class UtgBasedInputPolicy(InputPolicy):
     def check_rule_with_precondition(self):
         rules_to_check = self.android_check.get_rules_that_pass_the_preconditions()
         if len(rules_to_check) == 0:
-            print("No rules match the precondition")
+            self.logger.debug("No rules match the precondition")
             if hasattr(self, "not_reach_precondition_path_number"):
                 self.not_reach_precondition_path_number.append(self.path_index)
             return
@@ -234,14 +235,15 @@ class UtgBasedInputPolicy(InputPolicy):
             result = self.android_check.execute_rule(rule_to_check)
             if result == 0:
                 self.logger.error("-------check rule : assertion error------")
-                self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
+                self.logger.debug("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
                 self.rules[rule_to_check.function.__name__]["#trigger the bug"] += 1
-                self.triggered_bug_information.append((self.action_count, self.time_recoder.get_time_duration(), rule_to_check.function.__name__))
+                self.triggered_bug_information.append(
+                    (self.action_count, self.time_recoder.get_time_duration(), rule_to_check.function.__name__))
 
 
             elif result == 1:
                 self.logger.info("-------check rule : pass------")
-                self.logger.info("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
+                self.logger.debug("-------time from start : %s-----------" % str(self.time_recoder.get_time_duration()))
 
             elif result == 2:
                 self.logger.error("-------rule execute failed UiObjectNotFoundError-----------")
@@ -322,8 +324,7 @@ class UtgBasedInputPolicy(InputPolicy):
             bug_report_path = os.path.join(self.device.output_dir, "every_states")
             utils.generate_report(
                 bug_report_path,
-                bug_report_path,
-                0,
+                self.device.output_dir,
                 self.triggered_bug_information
             )
         self.logger.info("----------------------------------------")
@@ -338,23 +339,23 @@ class UtgBasedInputPolicy(InputPolicy):
                 "How many times satisfy the precondition: %s" % len(self.time_needed_to_satisfy_precondition))
             if len(self.triggered_bug_information) > 0:
                 self.logger.info("How many times trigger the bug: %s" % len(self.triggered_bug_information))
-            self.logger.info("----------------------------------------")
-            self.logger.info(
-                "the time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition)
-            self.logger.info("How many times check the property: %s" % len(self.time_to_check_rule))
-            self.logger.info("the time needed to check the property: %s" % self.time_to_check_rule)
+            # self.logger.info("----------------------------------------")
+            # self.logger.info(
+            #     "the time needed to satisfy the precondition: %s" % self.time_needed_to_satisfy_precondition)
+            # self.logger.info("How many times check the property: %s" % len(self.time_to_check_rule))
+            # self.logger.info("the time needed to check the property: %s" % self.time_to_check_rule)
         else:
             self.logger.info("did not satisfy the precondition")
 
         if len(self.triggered_bug_information) > 0:
-            self.logger.info("the action count and time needed to trigger the bug: %s" % self.triggered_bug_information)
+            self.logger.info("the action count, time needed to trigger the bug, and the property name: %s" % self.triggered_bug_information)
         else:
             self.logger.info("did not trigger the bug")
 
-        for rule in self.rules:
-            self.logger.info("rule: %s, #satisfy pre: %d, #check property: %d, #trigger the bug: %d" % (
-            rule, self.rules[rule]["#satisfy pre"], self.rules[rule]["#check property"],
-            self.rules[rule]["#trigger the bug"]))
+        # for rule in self.rules:
+        #     self.logger.info("property: %s, #satisfy precondition: %d, #check property: %d, #trigger the bug: %d" % (
+        #         rule, self.rules[rule]["#satisfy pre"], self.rules[rule]["#check property"],
+        #         self.rules[rule]["#trigger the bug"]))
 
 
 class MutatePolicy(UtgBasedInputPolicy):
@@ -867,7 +868,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
 
         self.__update_utg()
         self.last_state = self.current_state
-        
+
         if self.action_count % self.number_of_events_that_restart_app == 0 and self.clear_and_restart_app_data_after_100_events:
             self.logger.info("clear and restart app after %s events" % self.number_of_events_that_restart_app)
             return ReInstallAppEvent(self.app)
@@ -876,14 +877,14 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         if len(rules_to_check) > 0:
             t = self.time_recoder.get_time_duration()
             self.time_needed_to_satisfy_precondition.append(t)
-            self.logger.info(
+            self.logger.debug(
                 "has rule that matches the precondition and the time duration is " + self.time_recoder.get_time_duration())
             if random.random() < 0.5:
                 self.time_to_check_rule.append(t)
                 self.logger.info(" check rule")
                 self.check_rule_with_precondition()
                 if self.restart_app_after_check_property:
-                    self.logger.info("restart app after check property")
+                    self.logger.debug("restart app after check property")
                     return KillAppEvent(app=self.app)
                 return None
             else:
@@ -911,7 +912,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
         @return: InputEvent
         """
         current_state = self.current_state
-        self.logger.info("Current state: %s" % current_state.state_str)
+        self.logger.debug("Current state: %s" % current_state.state_str)
         if current_state.state_str in self.__missed_states:
             self.__missed_states.remove(current_state.state_str)
 
@@ -931,7 +932,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
                     EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP
             ) or self.__event_trace.endswith(EVENT_FLAG_START_APP):
                 self.__num_restarts += 1
-                self.logger.info(
+                self.logger.debug(
                     "The app had been restarted %d times.", self.__num_restarts
                 )
             else:
@@ -942,12 +943,12 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
                 if self.__num_restarts > MAX_NUM_RESTARTS:
                     # If the app had been restarted too many times, enter random mode
                     msg = "The app had been restarted too many times. Entering random mode."
-                    self.logger.info(msg)
+                    self.logger.debug(msg)
                     self.__random_explore = True
                 else:
                     # Start the app
                     self.__event_trace += EVENT_FLAG_START_APP
-                    self.logger.info("Trying to start the app...")
+                    self.logger.debug("Trying to start the app...")
                     return IntentEvent(intent=start_app_intent)
 
         elif current_state.get_app_activity_depth(self.app) > 0:
@@ -962,7 +963,7 @@ class UtgRandomPolicy(UtgBasedInputPolicy):
                 else:
                     go_back_event = KeyEvent(name="BACK")
                 self.__event_trace += EVENT_FLAG_NAVIGATE
-                self.logger.info("Going back to the app...")
+                self.logger.debug("Going back to the app...")
                 return go_back_event
         else:
             # If the app is in foreground

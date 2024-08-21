@@ -22,6 +22,8 @@ def parse_args():
     parser.add_argument("-n","--number_of_events_that_restart_app", action="store", dest="number_of_events_that_restart_app", default=100, type=int,
                         help="Every xx number of events, then restart the app. Default: 100")
     parser.add_argument("-m", "--main_path", action="store", dest="main_path", default=None)
+    parser.add_argument("-debug", action="store_true", dest="debug_mode",
+                        help="Run in debug mode (dump debug messages).")
     options = parser.parse_args()
     return options
 
@@ -53,8 +55,9 @@ def main():
                        output_dir=options.output_dir,
                        timeout=options.timeout,
                        policy_name=options.policy,
-                       number_of_events_that_restart_app=options.number_of_events_that_restart_app)
-
+                       number_of_events_that_restart_app=options.number_of_events_that_restart_app,
+                       debug_mode=options.debug_mode
+                       )
     print(AndroidCheck._rules_per_class)
     run_android_check_as_test(test_classes[0],setting)
 
