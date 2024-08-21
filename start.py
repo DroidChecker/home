@@ -9,11 +9,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Start Droidchecker to test app.",
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-f",nargs="+", action="store",dest="files", help="The python files to be tested.")
-    parser.add_argument("-d", action="store", dest="device_serial", default=input_manager.DEFAULT_DEVICE_SERIAL,
+    parser.add_argument("-d", "--device_serial", action="store", dest="device_serial", default=input_manager.DEFAULT_DEVICE_SERIAL,
                         help="The serial number of target device (use `adb devices` to find)")
-    parser.add_argument("-a", action="store", dest="apk_path", required=True,
+    parser.add_argument("-a","--apk", action="store", dest="apk_path", required=True,
                         help="The file path to target APK")
-    parser.add_argument("-o", action="store", dest="output_dir", default="output",
+    parser.add_argument("-o","--output", action="store", dest="output_dir", default="output",
                         help="directory of output")
     parser.add_argument("-p","--policy", action="store", dest="policy",choices=["random", "mutate"], default=input_manager.DEFAULT_POLICY,
                         help='Policy to use for test input generation. ')
@@ -24,6 +24,8 @@ def parse_args():
     parser.add_argument("-m", "--main_path", action="store", dest="main_path", default=None)
     parser.add_argument("-debug", action="store_true", dest="debug_mode",
                         help="Run in debug mode (dump debug messages).")
+    parser.add_argument("-keep_app", action="store_true", dest="keep_app",
+                        help="Keep the app on the device after testing.")
     options = parser.parse_args()
     return options
 
@@ -56,7 +58,8 @@ def main():
                        timeout=options.timeout,
                        policy_name=options.policy,
                        number_of_events_that_restart_app=options.number_of_events_that_restart_app,
-                       debug_mode=options.debug_mode
+                       debug_mode=options.debug_mode,
+                       keep_app=options.keep_app
                        )
     print(AndroidCheck._rules_per_class)
     run_android_check_as_test(test_classes[0],setting)

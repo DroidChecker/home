@@ -58,7 +58,6 @@ class DroidBot(object):
         :return:
         """
         if debug_mode:
-            
             logging.basicConfig(level=logging.DEBUG,format='%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
         else:

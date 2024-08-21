@@ -99,7 +99,7 @@ class Setting:
     event_count: int=input_manager.DEFAULT_EVENT_COUNT
     cv_mode=None
     debug_mode: bool=False
-    keep_app=None
+    keep_app:bool=None
     keep_env=None
     profiling_method=None
     grant_perm: bool=True
