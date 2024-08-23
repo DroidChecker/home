@@ -41,7 +41,14 @@ droidchecker -f example.py -a omninotes.apk
 ```
 
 That's it! You can see the test results in the "output" directory.
-You can also find other parameters in ``droidchecker -h``.
+
+#### Bug report
+The ``bug_report.html`` file in the output directory contains the bug report. You can see the details of the bug in this file.
+You can use the browser (Google Chrome, Firefox, etc.) to open this file.
+In the bug report, you can see the following information:
+1. The screenshots of the execution trace. It shows the UI state of the app during the test, which can help you identify and reproduce the bug. Under each screenshot, you can see the event index and the event type (e.g., click, long click) that executed on the UI state.  
+2. The bug link list. It shows the bug link of the bug. You can click the link to jump to the first state of the property that caused the bug. 
+
 
 ### Optional arguments
 
@@ -88,10 +95,18 @@ Finally, we can run the property by executing the following command:
 
 ```bash
 droidchecker -f [property_file_name] -a [apk_file_name]
-
 ```
 
 where ``property_file_name`` is the name of the property file.
+
+#### How to get the attribute of the UI object
+To get the attribute of the UI object, you can use the tool [weditor](https://github.com/alibaba/web-editor).
+
+```bash
+pip install weditor
+weditor
+```
+Then, you can connect the device and get the attribute of the UI object.
 
 ### API Documents
 
@@ -174,6 +189,15 @@ Suppose we have several properties in different files, we can run them together 
 ```bash
 droidchecker -f [property_file_name1] [property_file_name2] -a [apk_file_name]
 ```
+
+## Bug list found by DroidChecker
+* OmniNotes: [#942](https://github.com/federicoiosue/Omni-Notes/issues/942), [#946](https://github.com/federicoiosue/Omni-Notes/issues/946), [#948](https://github.com/federicoiosue/Omni-Notes/issues/948), [#949](https://github.com/federicoiosue/Omni-Notes/issues/949), [#950](https://github.com/federicoiosue/Omni-Notes/issues/950), [#951](https://github.com/federicoiosue/Omni-Notes/issues/951), [#954](https://github.com/federicoiosue/Omni-Notes/issues/954), [#956](https://github.com/federicoiosue/Omni-Notes/issues/956), [#939](https://github.com/federicoiosue/Omni-Notes/issues/939), [#981](https://github.com/federicoiosue/Omni-Notes/issues/981), [#937](https://github.com/federicoiosue/Omni-Notes/issues/937), [#938](https://github.com/federicoiosue/Omni-Notes/issues/938), [#938](https://github.com/federicoiosue/Omni-Notes/issues/937), [#939](https://github.com/federicoiosue/Omni-Notes/issues/937), [#940](https://github.com/federicoiosue/Omni-Notes/issues/940), [#941](https://github.com/federicoiosue/Omni-Notes/issues/941), [#945](https://github.com/federicoiosue/Omni-Notes/issues/945), 
+
+* Markor: [#2153](https://github.com/gsantner/markor/issues/2153), [#2196](https://github.com/gsantner/markor/issues/2196), [#2197](https://github.com/gsantner/markor/issues/2197), [#2198](https://github.com/gsantner/markor/issues/2198), [#2199](https://github.com/gsantner/markor/issues/2199), [#2250](https://github.com/gsantner/markor/issues/2250)
+* AmazeFileManager: [#3991](https://github.com/TeamAmaze/AmazeFileManager/issues/3991), [#4016](https://github.com/TeamAmaze/AmazeFileManager/issues/4016), [#4130](https://github.com/TeamAmaze/AmazeFileManager/issues/4130)
+* AnkiDroid: [#15993](https://github.com/ankidroid/Anki-Android/issues/15993), [#15995](https://github.com/ankidroid/Anki-Android/issues/15995)
+* transistor: [#488](https://codeberg.org/y20k/transistor/issues/488), [#489](https://codeberg.org/y20k/transistor/issues/489), [#495](https://codeberg.org/y20k/transistor/issues/495)
+* Simpletask: [#1230](https://github.com/mpcjanssen/simpletask-android/issues/1230)
 
 # Acknowledgement
 
