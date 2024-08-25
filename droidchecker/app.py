@@ -24,7 +24,10 @@ class App(object):
         if output_dir is not None:
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir)
+        from loguru import logger
 
+        # 禁用 `androguard` 模块的日志
+        logger.disable("androguard")
         from androguard.core.apk import APK
         self.apk = APK(self.app_path)
         self.package_name = self.apk.get_package()
