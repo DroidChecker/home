@@ -4,7 +4,7 @@ from droidchecker.main import AndroidCheck, Setting, run_android_check_as_test
 import importlib
 import os
 import argparse
-
+import sys
 def parse_args():
     parser = argparse.ArgumentParser(description="Start Droidchecker to test app.",
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -31,19 +31,30 @@ def parse_args():
 
 
 def import_and_instantiate_classes(files):
-    # 导入文件中的类，并且进行实例化，然后返回实例化的对象
     droidcheck_instance = []
+    current_path = os.path.abspath(os.getcwd())
+    
     for file in files:
-        print(file)
-        module_name = os.path.splitext(file)[0]
-        module = importlib.import_module(module_name)
+        module_path = os.path.join(current_path, file)
+        module_dir = os.path.dirname(module_path)
+        
+        if module_dir not in sys.path:
+            sys.path.insert(0, module_dir)  # 确保当前路径在 sys.path 中
 
-        # 寻找模块中的所有类，并尝试实例化它们
-        for attr_name in dir(module):
-            attr = getattr(module, attr_name)
-            if isinstance(attr, type) and issubclass(attr, AndroidCheck) and attr is not AndroidCheck:
-                instance = attr()  # 实例化子类
-                droidcheck_instance.append(instance)
+        module_name = os.path.splitext(os.path.relpath(file, start=current_path))[0]
+        module_name = module_name.replace("/", ".").replace("\\", ".")
+        
+        try:
+            module = importlib.import_module(module_name)
+            
+            # 寻找模块中的所有类，并尝试实例化它们
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name)
+                if isinstance(attr, type) and issubclass(attr, AndroidCheck) and attr is not AndroidCheck:
+                    instance = attr()  # 实例化子类
+                    droidcheck_instance.append(instance)
+        except ModuleNotFoundError as e:
+            print(f"Error importing module {module_name}: {e}")
     return droidcheck_instance
 
 def main():
