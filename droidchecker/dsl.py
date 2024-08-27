@@ -39,12 +39,12 @@ class Ui(UiObject):
     def long_click(self, duration: float = 0.5, timeout=None):
         super().long_click(duration, timeout)
         time.sleep(self.session.delay)
-        self.session.droidbot.take_screenshot(True, "long_click")
+        self.session.droidbot.device.take_screenshot(True, "long_click")
     
     def set_text(self, text, timeout=None):
         super().set_text(text, timeout)
         time.sleep(self.session.delay)
-        self.session.droidbot.take_screenshot(True, "set_text "+text)
+        self.session.droidbot.device.take_screenshot(True, "set_text "+text)
         
     def child(self, **kwargs):
         return Ui(self.session, self.selector.clone().child(**kwargs))
