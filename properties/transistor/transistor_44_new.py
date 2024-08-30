@@ -2,7 +2,7 @@ import string
 import sys
 import time
 sys.path.append("..")
-from main import *
+from droidchecker.main import *
 
 class Test(AndroidCheck):
     def __init__(
@@ -31,61 +31,62 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
-        self.device(text="Settings").click()
-        time.sleep(1)
-        self.device(scrollable=True).scroll.to(text="Edit Stations")
-        time.sleep(1)
-        self.device(text="Edit Stations").click()
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
+        d(text="Settings").click()
+        
+        d(scrollable=True).scroll.to(text="Edit Stations")
+        
+        d(text="Edit Stations").click()
+        
+        d.press("back")
+        
         for _ in range(3):
-            self.device(text="Add new station").click()
-            time.sleep(1)
+            d(text="Add new station").click()
+            
             station_name_prefix = ["bbc", "new", "swi","chn"]
             selected_station_name_prefix = random.choice(station_name_prefix)
-            self.device(resourceId="org.y20k.transistor:id/search_src_text").set_text(selected_station_name_prefix)
+            d(resourceId="org.y20k.transistor:id/search_src_text").set_text(selected_station_name_prefix)
             time.sleep(3)
-            random_selected_station = random.choice(self.device(resourceId="org.y20k.transistor:id/station_name"))
+            random_selected_station = random.choice(d(resourceId="org.y20k.transistor:id/station_name"))
             random_selected_station.click()
-            time.sleep(1)
-            self.device(text="Add").click()
-            time.sleep(1)
+            
+            d(text="Add").click()
+            
 
     # 44
     @precondition(
-        lambda self: self.device(resourceId="org.y20k.transistor:id/player_station_name").exists() and 
-        self.device(resourceId="org.y20k.transistor:id/station_name", text=self.device(resourceId="org.y20k.transistor:id/player_station_name").get_text()).exists() and not
-        self.device(text="Save Changes").exists()
+        lambda self: d(resourceId="org.y20k.transistor:id/player_station_name").exists() and 
+        d(resourceId="org.y20k.transistor:id/station_name", text=d(resourceId="org.y20k.transistor:id/player_station_name").get_text()).exists() and not
+        d(text="Save Changes").exists()
     )
     @rule()
     def rename_station_not_change_station_state(self):
-        playing_station_name = self.device(resourceId="org.y20k.transistor:id/player_station_name").get_text()
+        playing_station_name = d(resourceId="org.y20k.transistor:id/player_station_name").get_text()
         print("playing_station_name: " + playing_station_name)
-        self.device(resourceId="org.y20k.transistor:id/station_name", text=playing_station_name).long_click()
-        time.sleep(1)
+        d(resourceId="org.y20k.transistor:id/station_name", text=playing_station_name).long_click()
+        
         new_name = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=5).example()
         print("new_name: " + new_name)
-        self.device(resourceId="org.y20k.transistor:id/edit_station_name").set_text(new_name)
+        d(resourceId="org.y20k.transistor:id/edit_station_name").set_text(new_name)
         time.sleep(2)
-        self.device(text="Save Changes").click()
-        time.sleep(1)
-        assert self.device(resourceId="org.y20k.transistor:id/station_name", text=new_name).exists(), "NEW NAME DOES NOT EXIST in station"
-        assert self.device(resourceId="org.y20k.transistor:id/player_station_name", text=new_name).exists(), "NEW NAME DOES NOT EXIST in player"
-        assert not self.device(resourceId="org.y20k.transistor:id/station_name", text=playing_station_name).exists(), "OLD NAME STILL EXISTS"
+        d(text="Save Changes").click()
         
-start_time = time.time()
+        assert d(resourceId="org.y20k.transistor:id/station_name", text=new_name).exists(), "NEW NAME DOES NOT EXIST in station"
+        assert d(resourceId="org.y20k.transistor:id/player_station_name", text=new_name).exists(), "NEW NAME DOES NOT EXIST in player"
+        assert not d(resourceId="org.y20k.transistor:id/station_name", text=playing_station_name).exists(), "OLD NAME STILL EXISTS"
+        
 
-t = Test(
+
+t = Test()
+
+setting = Setting(
     apk_path="./apk/transistor/4.1.7.apk",
     device_serial="emulator-5554",
     output_dir="output/transistor/44/mutate_new/1",
-    policy_name="mutate",
+    policy_name="random",
     timeout=43200,
     number_of_events_that_restart_app = 100,
     run_initial_rules_after_every_mutation=False,
     main_path="main_path/transistor/44_new.json"
 )
-t.start()
-execution_time = time.time() - start_time
-print("execution time: " + str(execution_time))
+run_android_check_as_test(t,setting)
+

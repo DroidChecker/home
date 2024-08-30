@@ -2,113 +2,93 @@ import string
 import sys
 import time
 sys.path.append("..")
-from main import *
+from droidchecker.main import *
 
 class Test(AndroidCheck):
-    def __init__(
-        self,
-        apk_path,
-        device_serial="emulator-5554",
-        output_dir="output",
-        policy_name="pbt",
-        timeout=-1,
-        build_model_timeout=-1,
-        number_of_events_that_restart_app=100,
-        main_path=None
-    ):
-        super().__init__(
-            apk_path,
-            device_serial=device_serial,
-            output_dir=output_dir,
-            policy_name=policy_name,
-            timeout=timeout,
-            build_model_timeout=build_model_timeout,
-            number_of_events_that_restart_app=number_of_events_that_restart_app,
-            main_path=main_path
-        )
+    
 
     @initialize()
     def set_up(self):
-        if self.device(text="OK").exists():
-            self.device(text="OK").click()
-            time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/done").click()
-        time.sleep(1)
-        if self.device(text="OK").exists():
-            self.device(text="OK").click()
-            time.sleep(1)
+        if d(text="OK").exists():
+            d(text="OK").click()
+            
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/done").click()
+        
+        if d(text="OK").exists():
+            d(text="OK").click()
+            
         
     
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/menu_search").exists() and self.device(resourceId="it.feio.android.omninotes:id/note_title").exists() and self.device(text="Notes").exists() and not self.device(text="SETTINGS").exists())
+    @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_search").exists() and d(resourceId="it.feio.android.omninotes:id/note_title").exists() and d(text="Notes").exists() and not d(text="SETTINGS").exists())
     @rule()
     def rule_restore_backup_shouldnot_change_note(self):
         print("time: " + str(time.time() - start_time))
         
-        note_count = int(self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
+        note_count = int(d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
         selected_note = random.randint(0, note_count - 1)
         print("selected_note: " + str(selected_note))
-        time.sleep(1)
-        selected_note = self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].child(resourceId="it.feio.android.omninotes:id/card_layout")
-        time.sleep(1)
+        
+        selected_note = d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].child(resourceId="it.feio.android.omninotes:id/card_layout")
+        
         note_title = selected_note.child(resourceId="it.feio.android.omninotes:id/note_title").get_text()
         print("note_title: " + note_title)
-        time.sleep(1)
+        
         has_content = False
         if selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").exists():
             has_content = True
             note_content = selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text()
             print("note_content: " + note_content)
-        time.sleep(1)
+        
         has_attachment = selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists()
         print("has_attachment: " + str(has_attachment))
         
-        self.device(resourceId="it.feio.android.omninotes:id/toolbar").child(className="android.widget.ImageButton").click()
-        time.sleep(1)
-        self.device(text="Settings").click()
-        time.sleep(1)
-        self.device(text="Data").click()
-        time.sleep(1)
-        self.device(text="Sync and Backups").click()
-        time.sleep(1)
-        self.device(text="Backup").click()
-        time.sleep(1)
-        if self.device(textContains="ALLOW ACCESS TO").exists():
-            self.device(textContains="ALLOW ACCESS TO").click()
-            time.sleep(1)
-            if self.device(text="ALLOW").exists():
-                self.device(text="ALLOW").click()
-            if self.device(text="Allow").exists():
-                self.device(text="Allow").click()
-            time.sleep(1)
-        back_up_name = self.device(resourceId="it.feio.android.omninotes:id/export_file_name").get_text()
-        self.device(text="CONFIRM").click()
-        time.sleep(1)
-        self.device(text="Restore or delete backups").click()
-        time.sleep(1)
-        self.device(text=back_up_name).click()
-        time.sleep(1)
-        self.device(text="RESTORE").click()
-        time.sleep(1)
-        self.device(text="CONFIRM").click()
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
+        d(resourceId="it.feio.android.omninotes:id/toolbar").child(className="android.widget.ImageButton").click()
+        
+        d(text="Settings").click()
+        
+        d(text="Data").click()
+        
+        d(text="Sync and Backups").click()
+        
+        d(text="Backup").click()
+        
+        if d(textContains="ALLOW ACCESS TO").exists():
+            d(textContains="ALLOW ACCESS TO").click()
+            
+            if d(text="ALLOW").exists():
+                d(text="ALLOW").click()
+            if d(text="Allow").exists():
+                d(text="Allow").click()
+            
+        back_up_name = d(resourceId="it.feio.android.omninotes:id/export_file_name").get_text()
+        d(text="CONFIRM").click()
+        
+        d(text="Restore or delete backups").click()
+        
+        d(text=back_up_name).click()
+        
+        d(text="RESTORE").click()
+        
+        d(text="CONFIRM").click()
+        
+        d.press("back")
+        
+        d.press("back")
+        
+        d.press("back")
+        
+        d.press("back")
+        
         # 检查note的title，content，是否有attachment是否发生了变化
         assert selected_note.exists(), "selected note not exists"
         if note_title is not None:
@@ -118,17 +98,17 @@ class Test(AndroidCheck):
         assert selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists() == has_attachment, "has_attachment: " + str(selected_note.child(resourceId="it.feio.android.omninotes:id/attachmentThumbnail").exists())
 
 
-start_time = time.time()
 
-t = Test(
+
+t = Test()
+
+setting = Setting(
     apk_path="./apk/omninotes/OmniNotes-6.3.1.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/812/1",
-    policy_name="mutate",
-    timeout=21600,
-    number_of_events_that_restart_app = 100,
+    policy_name="random",
+
     main_path="main_path/omninotes/812_new.json"
 )
-t.start()
-execution_time = time.time() - start_time
-print("execution time: " + str(execution_time))
+run_android_check_as_test(t,setting)
+

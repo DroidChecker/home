@@ -1,5 +1,5 @@
 import string
-from main import *
+from droidchecker.main import *
 import time
 import sys
 import re
@@ -33,35 +33,35 @@ class Test(AndroidCheck):
 
     @initialize()
     def set_up(self):
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/next").click()
-        time.sleep(1)
+        d(resourceId="net.gsantner.markor:id/next").click()
         
-        self.device(text="DONE").click()
-        time.sleep(1)
+        d(resourceId="net.gsantner.markor:id/next").click()
         
-        if self.device(text="OK").exists():
-            self.device(text="OK").click()
-        time.sleep(1)
+        d(resourceId="net.gsantner.markor:id/next").click()
+        
+        d(resourceId="net.gsantner.markor:id/next").click()
+        
+        
+        d(text="DONE").click()
+        
+        
+        if d(text="OK").exists():
+            d(text="OK").click()
+        
         
     #bug 1220
     @precondition(
-        lambda self: self.device(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and not self.device(text="Settings").exists() and not self.device(text="Date").exists() and not self.device(resourceId="net.gsantner.markor:id/action_rename_selected_item").exists()
+        lambda self: d(resourceId="net.gsantner.markor:id/fab_add_new_item").exists() and not d(text="Settings").exists() and not d(text="Date").exists() and not d(resourceId="net.gsantner.markor:id/action_rename_selected_item").exists()
         )
     @rule()
     def change_file_format_should_work(self):
-        file_count = self.device(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title").count
+        file_count = d(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title").count
         print("file count: "+str(file_count))
         if file_count == 0:
             print("no file ")
             return
         file_index = random.randint(0, file_count - 1)
-        selected_file = self.device(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title")[file_index]
+        selected_file = d(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title")[file_index]
         file_name = selected_file.info['text']
         
         if "." not in file_name or ".." in file_name:
@@ -69,35 +69,37 @@ class Test(AndroidCheck):
             return
         print("file name: "+str(file_name))
         selected_file.click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text("# test")
-        time.sleep(1)
-        self.device(description="More options").click()
-        time.sleep(1)
-        self.device(text="File settings").click()
-        time.sleep(1)
-        self.device(text="Format").click()
-        time.sleep(1)
-        self.device(text="Markdown").click()
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/action_preview").click()
-        time.sleep(1)
-        assert "#" not in self.device(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"], "1 markdown format failed"
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device.press("back")
-        time.sleep(1)
-        self.device(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title")[file_index].click()
-        time.sleep(1)
-        assert "#" not in self.device(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"], "2 markdown format failed"
+        
+        d(resourceId="net.gsantner.markor:id/document__fragment__edit__highlighting_editor").set_text("# test")
+        
+        d(description="More options").click()
+        
+        d(text="File settings").click()
+        
+        d(text="Format").click()
+        
+        d(text="Markdown").click()
+        
+        d(resourceId="net.gsantner.markor:id/action_preview").click()
+        
+        assert "#" not in d(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"], "1 markdown format failed"
+        
+        d.press("back")
+        
+        d.press("back")
+        
+        d(resourceId="net.gsantner.markor:id/opoc_filesystem_item__title")[file_index].click()
+        
+        assert "#" not in d(className="android.webkit.WebView").child(className="android.view.View").info["contentDescription"], "2 markdown format failed"
     
 
 
-start_time = time.time()
 
 
-t = Test(
+
+t = Test()
+
+setting = Setting(
     apk_path="./apk/markor/2.11.1.apk",
     device_serial="emulator-5554",
     output_dir="output/markor/1220/1",
@@ -105,6 +107,4 @@ t = Test(
     diverse_event_count=500,
     policy_name="random",
 )
-t.start()
-execution_time = time.time() - start_time
-print("execution time: " + str(execution_time))
+

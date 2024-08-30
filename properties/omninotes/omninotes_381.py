@@ -2,104 +2,84 @@ import string
 import sys
 import time
 sys.path.append("..")
-from main import *
+from droidchecker.main import *
 
 class Test(AndroidCheck):
-    def __init__(
-        self,
-        apk_path,
-        device_serial="emulator-5554",
-        output_dir="output",
-        policy_name="pbt",
-        timeout=-1,
-        build_model_timeout=-1,
-        number_of_events_that_restart_app=100,
-        main_path=None
-    ):
-        super().__init__(
-            apk_path,
-            device_serial=device_serial,
-            output_dir=output_dir,
-            policy_name=policy_name,
-            timeout=timeout,
-            build_model_timeout=build_model_timeout,
-            number_of_events_that_restart_app=number_of_events_that_restart_app,
-            main_path=main_path
-        )
+    
 
     @initialize()
     def set_up(self):
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/done").click()
-        time.sleep(1)
-        if self.device(text="OK").exists():
-            self.device(text="OK").click()
-            time.sleep(1)
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/done").click()
+        
+        if d(text="OK").exists():
+            d(text="OK").click()
+            
     
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/toolbar").child(text="Trash").exists() and self.device(resourceId="it.feio.android.omninotes:id/root").exists() and not self.device(text="SETTINGS").exists())
+    @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/toolbar").child(text="Trash").exists() and d(resourceId="it.feio.android.omninotes:id/root").exists() and not d(text="SETTINGS").exists())
     @rule()
     def restore_note_from_trash_should_work(self):
         print("time: " + str(time.time() - start_time))
-        note_count = int(self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
+        note_count = int(d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
         selected_note = random.randint(0, note_count - 1)
         print("selected_note: " + str(selected_note))
-        time.sleep(1)
-        selected_note = self.device(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].child(resourceId="it.feio.android.omninotes:id/card_layout")
-        time.sleep(1)
+        
+        selected_note = d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root")[selected_note].child(resourceId="it.feio.android.omninotes:id/card_layout")
+        
         note_title = selected_note.child(resourceId="it.feio.android.omninotes:id/note_title").get_text()
         print("note_title: " + note_title)
         note_content = None
         if selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").exists():
             note_content = selected_note.child(resourceId="it.feio.android.omninotes:id/note_content").get_text()
             print("note_content: " + note_content)
-        time.sleep(1)
+        
         is_archive = selected_note.child(resourceId="it.feio.android.omninotes:id/archivedIcon").exists()
         print("is_archive: " + str(is_archive))
-        time.sleep(1)
+        
         selected_note.long_click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/menu_sort").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/toolbar").child(className="android.widget.ImageButton").click()
-        time.sleep(1)
+        
+        d(resourceId="it.feio.android.omninotes:id/menu_sort").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/toolbar").child(className="android.widget.ImageButton").click()
+        
         if is_archive:
             
-            assert self.device(text="Archive").exists(),"Archive should appear in drawer item"
-            time.sleep(1)
-            self.device(text="Archive").click()
-            time.sleep(1)
+            assert d(text="Archive").exists(),"Archive should appear in drawer item"
+            
+            d(text="Archive").click()
+            
             if note_title != "":
-                assert self.device(text=note_title).exists() ,"note should appear in Archive"
+                assert d(text=note_title).exists() ,"note should appear in Archive"
             if note_content is not None:
-                assert self.device(text=note_content).exists() ,"note should appear in Archive"
+                assert d(text=note_content).exists() ,"note should appear in Archive"
         else:
-            self.device(text="Notes").click()
-            time.sleep(1)
+            d(text="Notes").click()
+            
             if note_title != "":
-                assert self.device(text=note_title).exists() ,"note should appear in Notes"
+                assert d(text=note_title).exists() ,"note should appear in Notes"
             if note_content is not None:
-                assert self.device(text=note_content).exists() ,"note should appear in Notes"
+                assert d(text=note_content).exists() ,"note should appear in Notes"
 
-start_time = time.time()
 
-t = Test(
+
+t = Test()
+
+setting = Setting(
     apk_path="./apk/omninotes/OmniNotes-5.3.2.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/381/random_100/1",
-    policy_name="mutate",
-    timeout=21600,
-    number_of_events_that_restart_app = 100,
+    policy_name="random",
+
     main_path="main_path/omninotes/381.json"
 )
-t.start()
-execution_time = time.time() - start_time
-print("execution time: " + str(execution_time))
+run_android_check_as_test(t,setting)
+
