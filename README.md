@@ -2,7 +2,7 @@
 
 DroidChecker is a general and practical testing tool based on the idea of property-based testing for finding functional bugs in Android apps.
 
-📘 [Documentation](droidchecker-doc.readthedocs.io)
+📘 [Documentation](https://droidchecker-doc.readthedocs.io/en/latest/)
 
 ## Setup
 
