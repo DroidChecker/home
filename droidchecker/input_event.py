@@ -1002,7 +1002,10 @@ class IntentEvent(InputEvent):
         return "%s(intent='%s')" % (self.__class__.__name__, self.intent)
 
     def get_event_name(self):
-        return "%s" % self.intent
+        if isinstance(self.intent, Intent):
+            return "%s" % self.intent.prefix
+        else:
+            return "%s" % self.intent.split(" ")[1]
 
 class SpawnEvent(InputEvent):
     """

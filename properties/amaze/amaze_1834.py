@@ -2,66 +2,46 @@ import string
 import sys
 import time
 sys.path.append("..")
-from main import *
+from droidchecker.main import *
 
 class Test(AndroidCheck):
-    def __init__(
-        self,
-        apk_path,
-        device_serial="emulator-5554",
-        output_dir="output",
-        policy_name="pbt",
-        timeout=-1,
-        build_model_timeout=-1,
-        number_of_events_that_restart_app=100,
-        main_path=None
-    ):
-        super().__init__(
-            apk_path,
-            device_serial=device_serial,
-            output_dir=output_dir,
-            policy_name=policy_name,
-            timeout=timeout,
-            build_model_timeout=build_model_timeout,
-            number_of_events_that_restart_app=number_of_events_that_restart_app,
-            main_path=main_path
-        )
+    
 
     @initialize()
     def set_up(self):
-        if self.device(text="ALLOW").exists():
-            self.device(text="ALLOW").click()
-            time.sleep(1)
-        elif self.device(text="Allow").exists():
-            self.device(text="Allow").click()
-            time.sleep(1)
+        if d(text="ALLOW").exists():
+            d(text="ALLOW").click()
+            
+        elif d(text="Allow").exists():
+            d(text="Allow").click()
+            
 
-    @precondition(lambda self: self.device(textContains=".zip").exists() and not 
-                  self.device(text="Internal Storage").exists())
+    @precondition(lambda self: d(textContains=".zip").exists() and not 
+                  d(text="Internal Storage").exists())
     @rule()
     def extract_zip_file_shouldnot_need_password(self):
         print("time: " + str(time.time() - start_time))
-        zip_file = self.device(textContains=".zip")
+        zip_file = d(textContains=".zip")
         folder_name = zip_file.get_text().split(".")[0]
         print("zip_file: "+str(zip_file.get_text()))
         zip_file.click()
-        time.sleep(1)
-        self.device(text="EXTRACT").click()
-        time.sleep(1)
-        assert self.device(text=folder_name).exists(), "extract zip file failed with zip file name: "+str(zip_file.get_text())
+        
+        d(text="EXTRACT").click()
+        
+        assert d(text=folder_name).exists(), "extract zip file failed with zip file name: "+str(zip_file.get_text())
 
 
-start_time = time.time()
 
-t = Test(
+
+t = Test()
+
+setting = Setting(
     apk_path="./apk/amaze/amaze-3.4.2.apk",
     device_serial="emulator-5554",
     output_dir="output/amaze/1834/mutate/1",
-    policy_name="mutate",
-    timeout=21600,
-    number_of_events_that_restart_app = 100,
+    policy_name="random",
+
     main_path="main_path/amaze/1834.json"
 )
-t.start()
-execution_time = time.time() - start_time
-print("execution time: " + str(execution_time))
+run_android_check_as_test(t,setting)
+

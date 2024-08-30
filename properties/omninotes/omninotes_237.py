@@ -3,55 +3,35 @@ import sys
 import time
 import re
 sys.path.append("..")
-from main import *
+from droidchecker.main import *
 
 class Test(AndroidCheck):
-    def __init__(
-        self,
-        apk_path,
-        device_serial="emulator-5554",
-        output_dir="output",
-        policy_name="pbt",
-        timeout=-1,
-        build_model_timeout=-1,
-        number_of_events_that_restart_app=100,
-        main_path=None
-    ):
-        super().__init__(
-            apk_path,
-            device_serial=device_serial,
-            output_dir=output_dir,
-            policy_name=policy_name,
-            timeout=timeout,
-            build_model_timeout=build_model_timeout,
-            number_of_events_that_restart_app=number_of_events_that_restart_app,
-            main_path=main_path
-        )
+    
 
     @initialize()
     def set_up(self):
-        if self.device(text="OK").exists():
-            self.device(text="OK").click()
-            time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/next").click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/done").click()
-        time.sleep(1)
-        if self.device(text="OK").exists():
-            self.device(text="OK").click()
-            time.sleep(1)
+        if d(text="OK").exists():
+            d(text="OK").click()
+            
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/next").click()
+        
+        d(resourceId="it.feio.android.omninotes:id/done").click()
+        
+        if d(text="OK").exists():
+            d(text="OK").click()
+            
     
     def check_hash_tag_exist(self):
         
-        for content in self.device(resourceId="it.feio.android.omninotes:id/note_content"):
+        for content in d(resourceId="it.feio.android.omninotes:id/note_content"):
             content = content.get_text()
             if "#" not in content:
                 continue
@@ -62,7 +42,7 @@ class Test(AndroidCheck):
                 continue
             return True
         
-        for title in self.device(resourceId="it.feio.android.omninotes:id/note_title"):
+        for title in d(resourceId="it.feio.android.omninotes:id/note_title"):
             title = title.get_text()
             if "#" not in title:
                 continue
@@ -77,16 +57,16 @@ class Test(AndroidCheck):
 
 
 
-    @precondition(lambda self: self.device(resourceId="it.feio.android.omninotes:id/note_content").exists() and not
-                  self.device(text="SETTINGS").exists() and 
+    @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/note_content").exists() and not
+                  d(text="SETTINGS").exists() and 
                   self.check_hash_tag_exist() and not
-                  self.device(resourceId="it.feio.android.omninotes:id/action_mode_close_button").exists()
+                  d(resourceId="it.feio.android.omninotes:id/action_mode_close_button").exists()
     )
     @rule()
     def hash_tag_with_number_start_shouldbe_recognized(self):
         
         hashtag_UI_element = []
-        for note_content in self.device(resourceId="it.feio.android.omninotes:id/note_content"):
+        for note_content in d(resourceId="it.feio.android.omninotes:id/note_content"):
             content = note_content.get_text()
             if "#" not in content:
                 continue
@@ -99,7 +79,7 @@ class Test(AndroidCheck):
             hashtag = tags
             hashtag_UI_element.append((note_content,hashtag))
         
-        for note_title in self.device(resourceId="it.feio.android.omninotes:id/note_title"):
+        for note_title in d(resourceId="it.feio.android.omninotes:id/note_title"):
             title = note_title.get_text()
             if "#" not in title:
                 continue
@@ -116,22 +96,23 @@ class Test(AndroidCheck):
         selected_hashtag_UI_element =selected[0]
         selected_hashtag = selected[1]
         selected_hashtag_UI_element.click()
-        time.sleep(1)
-        self.device(resourceId="it.feio.android.omninotes:id/menu_tag").click()
-        time.sleep(1)
+        
+        d(resourceId="it.feio.android.omninotes:id/menu_tag").click()
+        
         for tag in selected_hashtag:
-            assert self.device(resourceId="it.feio.android.omninotes:id/title",textContains=tag).exists(), "tag not found"
+            assert d(resourceId="it.feio.android.omninotes:id/title",textContains=tag).exists(), "tag not found"
 
-start_time = time.time()
 
-t = Test(
+
+t = Test()
+
+setting = Setting(
     apk_path="./apk/omninotes/OmniNotes-5.1.0.apk",
     device_serial="emulator-5554",
     output_dir="output/omninotes/237/random_100/1",
     policy_name="random",
-    timeout=21600,
+    
     number_of_events_that_restart_app = 100
 )
-t.start()
-execution_time = time.time() - start_time
-print("execution time: " + str(execution_time))
+run_android_check_as_test(t,setting)
+
