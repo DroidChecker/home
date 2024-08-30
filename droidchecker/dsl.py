@@ -11,7 +11,9 @@ class Mobile(Device):
 
     def set_device_serial(self, serial):
         super().__init__(serial=serial)
-
+        # setting operation delay
+        self.settings['operation_delay'] = (0, self.delay)
+        self.settings['wait_timeout'] = 5.0 # 默认控件等待时间
     def __call__(self, **kwargs: Any) -> Any:
         return Ui(self, Selector(**kwargs))
 
@@ -20,30 +22,25 @@ class Mobile(Device):
 
     def rotate(self, mode: str):
         super().set_orientation(mode)
-        time.sleep(self.delay)
         self.droidbot.device.take_screenshot(True, "rotate")
 
     def press(self, key: Union[int, str], meta=None):
         super().press(key, meta)
-        time.sleep(self.delay)
         self.droidbot.device.take_screenshot(True, "press")
 
 
 class Ui(UiObject):
 
-    def click(self, timeout=None, offset=None):
-        super().click(timeout, offset)
-        time.sleep(self.session.delay)
+    def click(self, offset=None):
+        super().click(offset)
         self.session.droidbot.device.take_screenshot(True, "click")
 
-    def long_click(self, duration: float = 0.5, timeout=None):
-        super().long_click(duration, timeout)
-        time.sleep(self.session.delay)
+    def long_click(self, duration: float = 0.5):
+        super().long_click(duration)
         self.session.droidbot.device.take_screenshot(True, "long_click")
     
-    def set_text(self, text, timeout=None):
-        super().set_text(text, timeout)
-        time.sleep(self.session.delay)
+    def set_text(self, text):
+        super().set_text(text)
         self.session.droidbot.device.take_screenshot(True, "set_text "+text)
         
     def child(self, **kwargs):
