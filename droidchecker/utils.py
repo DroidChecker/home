@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import functools
@@ -125,15 +126,22 @@ def generate_report(img_path, html_path, bug_information=None):
     for img_file in sorted_img_list:
         if ".png" in img_file:
             
-            num_start = img_file.find("_")
-            num_end = img_file.find("_", num_start + 1)    
-            if num_end == -1:
-                num_end = img_file.find(".png")
+            # num_start = img_file.find("_")
+            # num_end = img_file.find("_", num_start + 1)
+            # if num_end == -1:
+            #     num_end = img_file.find(".png")
             state_num = 1
-            action_count = img_file[num_start + 1 : num_end]
-            event_name_end = img_file.find(".png")
-            event_name = img_file[num_end + 1 : event_name_end]
-            img_file = os.path.join("every_states", img_file)
+            # action_count = img_file[num_start + 1 : num_end]
+            # event_name_end = img_file.find(".png")
+            # event_name = img_file[num_end + 1 : event_name_end]
+            # img_file = os.path.join("every_states", img_file)
+            json_dir = os.path.join(html_path, "report_screen_shoot.json")
+            with open(json_dir, 'r') as json_file:
+                report_screens = json.load(json_file)
+            report_screen = list(filter(lambda person: person["screen_shoot"] == img_file, report_screens))
+            report_screen = report_screen[0]
+            action_count = report_screen['event_index']
+            event_name = report_screen['event']
             line = (
                 "      <li><img src=\""
                 + img_file

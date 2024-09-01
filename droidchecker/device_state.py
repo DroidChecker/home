@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import math
 import os
@@ -222,6 +223,24 @@ class DeviceState(object):
                 dest_screenshot_path = "%s/screen_%s.jpg" % (output_dir, self.tag)
             else:
                 dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
+                json_dir = os.path.join(self.device.output_dir, "report_screen_shoot.json")
+                try:
+                    with open(json_dir, 'r') as json_file:
+                        report_screens = json.load(json_file)
+                except FileNotFoundError:
+                    report_screens = []
+                if event is not None:
+                    event_name = event.get_event_name()
+                report_screen = {
+                    "event": event_name,
+                    "event_index": self.tag,
+                    "screen_shoot": "screen_" + self.tag + ".png"
+                }
+                report_screens.append(report_screen)
+
+                with open(json_dir, 'w') as json_file:
+                    json.dump(report_screens, json_file, indent=4)
+
             if self.screenshot_path != dest_screenshot_path:
 
                 state_json_file = open(dest_state_json_path, "w")
@@ -232,8 +251,8 @@ class DeviceState(object):
                 shutil.copyfile(self.screenshot_path, dest_screenshot_path)
             if event is not None:
                 self.draw_event(event, dest_screenshot_path)
-                os.rename(dest_screenshot_path, "%s/screen_%s_%s.png" % (output_dir, self.tag, event.get_event_name()))
-                dest_screenshot_path = "%s/screen_%s_%s.png" % (output_dir, self.tag, event.get_event_name())
+                os.rename(dest_screenshot_path, "%s/screen_%s.png" % (output_dir, self.tag))
+                dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
                 
             self.screenshot_path = dest_screenshot_path
             # from PIL.Image import Image
