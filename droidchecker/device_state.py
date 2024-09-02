@@ -231,12 +231,6 @@ class DeviceState(object):
             except FileNotFoundError:
                 report_screens = []
 
-            #清理初始化界面以外的json文件内容
-            if self.tag == 2:
-                index = next((i for i, report_screen in enumerate(report_screens) if report_screen["event_index"] == "2"), None)
-                if index is not None:
-                    report_screens = report_screens[:index]
-
             if self.screenshot_path != dest_screenshot_path:
 
                 state_json_file = open(dest_state_json_path, "w")

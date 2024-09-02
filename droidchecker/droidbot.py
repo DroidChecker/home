@@ -67,8 +67,12 @@ class DroidBot(object):
         DroidBot.instance = self
         self.output_dir = output_dir
         if output_dir is not None:
-            if not os.path.isdir(output_dir):
-                os.makedirs(output_dir)
+            #清空前一次运行留下的output，防止json匹配错误
+            if os.path.isdir(output_dir):
+                shutil.rmtree(output_dir)
+            os.makedirs(output_dir)
+            # if not os.path.isdir(output_dir):
+            #     os.makedirs(output_dir)
             html_index_path = pkg_resources.resource_filename(
                 "droidchecker", "resources/index.html"
             )
