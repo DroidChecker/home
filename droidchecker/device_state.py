@@ -219,27 +219,23 @@ class DeviceState(object):
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             dest_state_json_path = "%s/state_%s.json" % (output_dir, self.tag)
+            json_dir = os.path.join(self.device.output_dir, "report_screen_shoot.json")
             if self.device.adapters[self.device.minicap]:
                 dest_screenshot_path = "%s/screen_%s.jpg" % (output_dir, self.tag)
             else:
                 dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
-                json_dir = os.path.join(self.device.output_dir, "report_screen_shoot.json")
-                try:
-                    with open(json_dir, 'r') as json_file:
-                        report_screens = json.load(json_file)
-                except FileNotFoundError:
-                    report_screens = []
-                if event is not None:
-                    event_name = event.get_event_name()
-                report_screen = {
-                    "event": event_name,
-                    "event_index": self.tag,
-                    "screen_shoot": "screen_" + self.tag + ".png"
-                }
-                report_screens.append(report_screen)
 
-                with open(json_dir, 'w') as json_file:
-                    json.dump(report_screens, json_file, indent=4)
+            try:
+                with open(json_dir, 'r') as json_file:
+                    report_screens = json.load(json_file)
+            except FileNotFoundError:
+                report_screens = []
+
+            #清理初始化界面以外的json文件内容
+            if self.tag == 2:
+                index = next((i for i, report_screen in enumerate(report_screens) if report_screen["event_index"] == "2"), None)
+                if index is not None:
+                    report_screens = report_screens[:index]
 
             if self.screenshot_path != dest_screenshot_path:
 
@@ -249,11 +245,29 @@ class DeviceState(object):
                 import shutil
 
                 shutil.copyfile(self.screenshot_path, dest_screenshot_path)
+                if self.device.adapters[self.device.minicap]:
+                    report_screen = {
+                        "event": "",
+                        "event_index": str(self.tag),
+                        "screen_shoot": "screen_" + str(self.tag) + ".jpg"
+                    }
+                else:
+                    report_screen = {
+                        "event": "",
+                        "event_index": str(self.tag),
+                        "screen_shoot": "screen_" + str(self.tag) + ".png"
+                    }
+                report_screens.append(report_screen)
+
             if event is not None:
                 self.draw_event(event, dest_screenshot_path)
-                os.rename(dest_screenshot_path, "%s/screen_%s.png" % (output_dir, self.tag))
-                dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
-                
+                # os.rename(dest_screenshot_path, "%s/screen_%s.png" % (output_dir, self.tag))
+                # dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
+                report_screens[-1]["event"] = event.get_event_name()
+
+            with open(json_dir, 'w') as json_file:
+                json.dump(report_screens, json_file, indent=4)
+
             self.screenshot_path = dest_screenshot_path
             # from PIL.Image import Image
             # if isinstance(self.screenshot_path, Image):

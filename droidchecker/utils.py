@@ -123,8 +123,8 @@ def generate_report(img_path, html_path, bug_information=None):
     )
     new_str = "<ul id=\"menu\">" + '\n'
     new_bug_str = ""
-    for img_file in sorted_img_list:
-        if ".png" in img_file:
+    for img_name in sorted_img_list:
+        if ".png" in img_name:
             
             # num_start = img_file.find("_")
             # num_end = img_file.find("_", num_start + 1)
@@ -134,11 +134,11 @@ def generate_report(img_path, html_path, bug_information=None):
             # action_count = img_file[num_start + 1 : num_end]
             # event_name_end = img_file.find(".png")
             # event_name = img_file[num_end + 1 : event_name_end]
-            # img_file = os.path.join("every_states", img_file)
+            img_file = os.path.join("every_states", img_name)
             json_dir = os.path.join(html_path, "report_screen_shoot.json")
             with open(json_dir, 'r') as json_file:
                 report_screens = json.load(json_file)
-            report_screen = list(filter(lambda person: person["screen_shoot"] == img_file, report_screens))
+            report_screen = list(filter(lambda person: person["screen_shoot"] == img_name, report_screens))
             report_screen = report_screen[0]
             action_count = report_screen['event_index']
             event_name = report_screen['event']
