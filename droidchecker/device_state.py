@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import math
 import os
@@ -218,10 +219,18 @@ class DeviceState(object):
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             dest_state_json_path = "%s/state_%s.json" % (output_dir, self.tag)
+            json_dir = os.path.join(self.device.output_dir, "report_screen_shoot.json")
             if self.device.adapters[self.device.minicap]:
                 dest_screenshot_path = "%s/screen_%s.jpg" % (output_dir, self.tag)
             else:
                 dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
+
+            try:
+                with open(json_dir, 'r') as json_file:
+                    report_screens = json.load(json_file)
+            except FileNotFoundError:
+                report_screens = []
+
             if self.screenshot_path != dest_screenshot_path:
 
                 state_json_file = open(dest_state_json_path, "w")
@@ -230,11 +239,29 @@ class DeviceState(object):
                 import shutil
 
                 shutil.copyfile(self.screenshot_path, dest_screenshot_path)
+                if self.device.adapters[self.device.minicap]:
+                    report_screen = {
+                        "event": "",
+                        "event_index": str(self.tag),
+                        "screen_shoot": "screen_" + str(self.tag) + ".jpg"
+                    }
+                else:
+                    report_screen = {
+                        "event": "",
+                        "event_index": str(self.tag),
+                        "screen_shoot": "screen_" + str(self.tag) + ".png"
+                    }
+                report_screens.append(report_screen)
+
             if event is not None:
                 self.draw_event(event, dest_screenshot_path)
-                os.rename(dest_screenshot_path, "%s/screen_%s_%s.png" % (output_dir, self.tag, event.get_event_name()))
-                dest_screenshot_path = "%s/screen_%s_%s.png" % (output_dir, self.tag, event.get_event_name())
-                
+                # os.rename(dest_screenshot_path, "%s/screen_%s.png" % (output_dir, self.tag))
+                # dest_screenshot_path = "%s/screen_%s.png" % (output_dir, self.tag)
+                report_screens[-1]["event"] = event.get_event_name()
+
+            with open(json_dir, 'w') as json_file:
+                json.dump(report_screens, json_file, indent=4)
+
             self.screenshot_path = dest_screenshot_path
             # from PIL.Image import Image
             # if isinstance(self.screenshot_path, Image):

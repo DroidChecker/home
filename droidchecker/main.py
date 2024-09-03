@@ -118,9 +118,9 @@ d = Mobile()
 def run_android_check_as_test(android_check_class, settings = None):
     if settings is None:
         settings = android_check_class.TestCase.settings
-    
+
     def run_android_check(android_check_class):
-        
+
         droid = DroidBot(
             app_path=settings.apk_path,
             device_serial=settings.device_serial,

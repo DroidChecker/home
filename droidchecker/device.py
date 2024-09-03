@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -902,11 +903,36 @@ class Device(object):
                 event_index = event_index.split(".")[0] + "." + str(int(suffix) + 1)
             else:
                 event_index = str(event_index+ ".1")
-            new_file_suffix = event_index + "_" + event_name
-            dest_file = "%s/%s" % (every_states_dir, "screen_%s.png" % new_file_suffix)
+
+            json_dir = os.path.join(self.output_dir, "report_screen_shoot.json")
+            try:
+                with open(json_dir, 'r') as json_file:
+                    report_screens = json.load(json_file)
+            except FileNotFoundError:
+                report_screens = []
+            report_screen = {
+                "event" : event_name,
+                "event_index" : event_index,
+                "screen_shoot": "screen_" + event_index + ".png"
+            }
+            report_screens.append(report_screen)
+
+            with open(json_dir, 'w') as json_file:
+                json.dump(report_screens, json_file, indent=4)
+            dest_file = "%s/%s" % (every_states_dir, "screen_%s.png" % event_index)
             shutil.move(local_image_path, dest_file)
         else:
-            dest_file = "%s/%s" % (every_states_dir, "screen_1_%s.png" % event_name)
+            report_screens = []
+            report_screen ={
+                "event" : event_name,
+                "event_index": "1",
+                "screen_shoot": "screen_1.png"
+            }
+            report_screens.append(report_screen)
+            json_dir = os.path.join(self.output_dir, "report_screen_shoot.json")
+            with open(json_dir, 'w') as json_file:
+                json.dump(report_screens, json_file, indent=4)
+            dest_file = "%s/%s" % (every_states_dir, "screen_1.png")
             shutil.move(local_image_path, dest_file)
         
 
