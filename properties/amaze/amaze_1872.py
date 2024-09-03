@@ -23,7 +23,7 @@ class Test(AndroidCheck):
     )
     @rule()
     def search_folder_should_be_opened(self):
-        print("time: " + str(time.time() - start_time))
+        
         folder_count = d(resourceId="com.amaze.filemanager:id/firstline").count
         print("folder count: "+str(folder_count))
         folder = None

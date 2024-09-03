@@ -29,7 +29,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and d(resourceId="it.feio.android.omninotes:id/menu_share").exists() and d(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
     @rule()
     def rule_remove_tag_from_note_shouldnot_affect_content(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(description = "More options").click()
         
         if d(text="Disable checklist").exists():

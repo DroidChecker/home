@@ -26,7 +26,7 @@ class Test(AndroidCheck):
                   )
     @rule()
     def rule_open_folder(self):
-        print("time: " + str(time.time() - start_time))
+        
         count = d(resourceId="com.amaze.filemanager:id/firstline").count
         print("count: "+str(count))
         index = random.randint(0, count-1)

@@ -26,7 +26,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="App Manager").exists() and d(description="More options").exists() and not d(text="Settings").exists())
     @rule()
     def click_exist_button_should_work(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(description="More options").click()
         
         d(text="Exit").click()

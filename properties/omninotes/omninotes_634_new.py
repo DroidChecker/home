@@ -35,7 +35,7 @@ class Test(AndroidCheck):
                    )
     @rule()
     def rule_remove_tag_from_note_shouldnot_affect_content(self):
-        print("time: " + str(time.time() - start_time))
+        
         origin_content = d(resourceId="it.feio.android.omninotes:id/detail_content").info["text"]
         print("origin_content: " + str(origin_content))
         

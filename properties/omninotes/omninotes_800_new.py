@@ -29,7 +29,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and d(resourceId="it.feio.android.omninotes:id/menu_share").exists() and d(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
     @rule()
     def count_char_in_note(self):
-        print("time: " + str(time.time() - start_time))
+        
         
         title = d(resourceId="it.feio.android.omninotes:id/detail_title").get_text()
         print("title: " + title)

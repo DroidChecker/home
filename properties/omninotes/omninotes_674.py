@@ -29,7 +29,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Interface").exists() and d(text="Language").exists())
     @rule()
     def check_languge_selection(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(text="Language").click()
         
         assert d(scrollable=True).scroll.to(text="Suomi (Finnish)"), "Finnish"

@@ -23,7 +23,7 @@ class Test(AndroidCheck):
                   d(text="Cloud Connection").exists() )
     @rule()
     def rule_FAB_should_appear(self):
-        print("time: " + str(time.time() - start_time))
+        
         assert d(resourceId="com.amaze.filemanager:id/sd_main_fab").exists(), "FAB should appear"
 
 

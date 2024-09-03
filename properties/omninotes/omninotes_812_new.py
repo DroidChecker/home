@@ -32,7 +32,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_search").exists() and d(resourceId="it.feio.android.omninotes:id/note_title").exists() and d(text="Notes").exists() and not d(text="SETTINGS").exists())
     @rule()
     def rule_restore_backup_shouldnot_change_note(self):
-        print("time: " + str(time.time() - start_time))
+        
         
         note_count = int(d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
         selected_note = random.randint(0, note_count - 1)

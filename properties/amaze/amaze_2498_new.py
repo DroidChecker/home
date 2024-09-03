@@ -10,7 +10,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="App Manager").exists() and d(description="More options").exists())
     @rule()
     def click_sort_should_work(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(resourceId="com.amaze.filemanager:id/sort").click()
         
         assert d(text="Sort By").exists()

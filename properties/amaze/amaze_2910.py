@@ -19,7 +19,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="com.amaze.filemanager:id/item_count").exists() and d(resourceId="com.amaze.filemanager:id/check_icon").exists() and d(resourceId="com.amaze.filemanager:id/cpy").exists())
     @rule()
     def rotate_should_persist_selected_item(self):
-        print("time: " + str(time.time() - start_time))
+        
         d.set_orientation('l')
         
         d.set_orientation('n')

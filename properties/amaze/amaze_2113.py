@@ -19,7 +19,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="com.amaze.filemanager:id/firstline").exists() and d(resourceId="com.amaze.filemanager:id/sd_main_fab").exists() and not d(resourceId="com.amaze.filemanager:id/donate").exists())
     @rule()
     def rule_rename(self):
-        print("time: " + str(time.time() - start_time))
+        
         count = d(resourceId="com.amaze.filemanager:id/firstline").count
         print("count: "+str(count))
         index = random.randint(0, count-1)

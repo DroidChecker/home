@@ -11,7 +11,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Type to search…").exists())
     @rule()
     def rule_search(self):
-        print("time: " + str(time.time() - start_time))
+        
         characters = st.text(alphabet=string.ascii_lowercase,min_size=1, max_size=1).example()
         print("characters: "+str(characters))
         d(text="Type to search…").set_text(characters)

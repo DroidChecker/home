@@ -19,7 +19,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Color").exists() and d(text="Customize").exists())
     @rule()
     def back_should_not_go_to_main_setting(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(description="Navigate up").click()
         
         assert not d(text="Settings").exists()

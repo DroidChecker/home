@@ -19,7 +19,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_attachment").exists())
     @rule()
     def remove_password_should_not_affect_notes(self):
-        print("time: " + str(time.time() - start_time))
+        
         note_title = st.text(alphabet=string.ascii_letters,min_size=1, max_size=10).example()
         print("title: " + note_title)
         d(resourceId="it.feio.android.omninotes:id/detail_title").set_text(note_title)

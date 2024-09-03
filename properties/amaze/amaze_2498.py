@@ -21,7 +21,7 @@ class Test(AndroidCheck):
                   d(text="Settings").exists())
     @rule()
     def click_sort_should_work(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(resourceId="com.amaze.filemanager.debug:id/sort").click()
         
         

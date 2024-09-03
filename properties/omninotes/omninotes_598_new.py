@@ -106,7 +106,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Data").exists() and d(text="Password").exists())
     @rule()
     def remove_password_in_setting_should_effect(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(text="Password").click()
         
         d(text="REMOVE PASSWORD").click()

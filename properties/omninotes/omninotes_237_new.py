@@ -31,7 +31,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_attachment").exists() and d(resourceId="it.feio.android.omninotes:id/menu_share").exists() and d(resourceId="it.feio.android.omninotes:id/menu_tag").exists() )
     @rule()
     def hash_tag_shouldbe_recognized(self):
-        print("time: " + str(time.time() - start_time))
+        
         text = st.text(alphabet=string.ascii_letters,min_size=2, max_size=5).example()
         tag = "#"+ text
         print("tag: " + tag)

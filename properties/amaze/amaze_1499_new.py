@@ -26,7 +26,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Go Back").exists() and d(resourceId="com.amaze.filemanager:id/second").exists() and d(resourceId="com.amaze.filemanager:id/fullpath").get_text() != "/storage/emulated/0" and not d(resourceId="com.amaze.filemanager:id/donate").exists() and not d(text="Cloud Connection").exists() and not d(resourceId="com.amaze.filemanager:id/check_icon").exists())
     @rule()
     def rule_go_back(self):
-        print("time: " + str(time.time() - start_time))
+        
         original_path = d(resourceId="com.amaze.filemanager:id/fullpath").get_text()
         print("original path: "+str(original_path))
         

@@ -15,7 +15,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Interface").exists() and d(text="Language").exists())
     @rule()
     def change_language_to_chinese(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(text="Language").click()
         
         d(text="中文 (Chinese Simplified)").click()

@@ -26,7 +26,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/menu_attachment").exists())
     @rule()
     def sroll_down_on_attachment(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(resourceId="it.feio.android.omninotes:id/menu_attachment").click()
         
         if d(text="Pushbullet").exists():

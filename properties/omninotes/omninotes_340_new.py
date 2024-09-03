@@ -32,7 +32,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/count").exists() and d(text="Settings").exists())
     @rule()
     def delete_category_should_remove_immediately(self):
-        print("time: " + str(time.time() - start_time))
+        
         category_count = d(resourceId="it.feio.android.omninotes:id/count").count
         selected_category_index = random.randint(0, category_count - 1)
         selected_category = d(resourceId="it.feio.android.omninotes:id/count")[selected_category_index].left(resourceId="it.feio.android.omninotes:id/title")

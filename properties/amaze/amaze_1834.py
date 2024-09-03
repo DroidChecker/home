@@ -20,7 +20,7 @@ class Test(AndroidCheck):
                   d(text="Internal Storage").exists())
     @rule()
     def extract_zip_file_shouldnot_need_password(self):
-        print("time: " + str(time.time() - start_time))
+        
         zip_file = d(textContains=".zip")
         folder_name = zip_file.get_text().split(".")[0]
         print("zip_file: "+str(zip_file.get_text()))

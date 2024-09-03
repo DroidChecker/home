@@ -12,7 +12,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Documents").exists()  and not d(text="Settings").exists())
     @rule()
     def rule_documnets(self):
-        print("time: " + str(time.time() - start_time))
+        
         
         assert d(resourceId="com.amaze.filemanager:id/firstline").exists()
 

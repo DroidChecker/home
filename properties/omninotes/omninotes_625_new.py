@@ -31,7 +31,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(text="Categorize as").exists())
     @rule()
     def rule_add_category_should_change_number(self):
-        print("time: " + str(time.time() - start_time))
+        
         d(text="ADD CATEGORY").click()
         
         category_name = st.text(alphabet=string.printable,min_size=1, max_size=10).example()

@@ -32,7 +32,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/toolbar").child(text="Trash").exists() and d(resourceId="it.feio.android.omninotes:id/root").exists() and not d(text="Settings").exists())
     @rule()
     def restore_note_from_trash_should_work(self):
-        print("time: " + str(time.time() - start_time))
+        
         note_count = int(d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").count)
         selected_note = random.randint(0, note_count - 1)
         print("selected_note: " + str(selected_note))

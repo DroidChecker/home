@@ -21,7 +21,7 @@ class Test(AndroidCheck):
                   d(resourceId="com.amaze.filemanager:id/donate").exists())
     @rule()
     def rule_hide_unhide_file(self):
-        print("time: " + str(time.time() - start_time))
+        
         # first hide a file or folder
         count = d(resourceId="com.amaze.filemanager:id/firstline").count
         print("count: "+str(count))

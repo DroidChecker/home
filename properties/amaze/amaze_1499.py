@@ -22,7 +22,7 @@ class Test(AndroidCheck):
                     )
     @rule()
     def rule_go_back(self):
-        print("time: " + str(time.time() - start_time))
+        
         original_path = d(resourceId="com.amaze.filemanager:id/fullpath").get_text()
         print("original path: "+str(original_path))
         

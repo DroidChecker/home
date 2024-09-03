@@ -29,7 +29,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/note_title").exists() and d(text="Notes").exists() and not d(text="Settings").exists() and d(resourceId="it.feio.android.omninotes:id/lockedIcon").exists())
     @rule()
     def swipe_locked_note(self):
-        print("time: " + str(time.time() - start_time))
+        
         selected_note = d(resourceId="it.feio.android.omninotes:id/lockedIcon").up(resourceId="it.feio.android.omninotes:id/note_title")
         selected_note_text = selected_note.get_text()
         print("selected_note_text: " + selected_note_text)

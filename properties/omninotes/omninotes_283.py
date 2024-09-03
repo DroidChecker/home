@@ -29,7 +29,7 @@ class Test(AndroidCheck):
     @precondition(lambda self: d(resourceId="it.feio.android.omninotes:id/search_query").exists() and d(resourceId="it.feio.android.omninotes:id/root").exists() and not d(text="SETTINGS").exists())
     @rule()
     def search_result_should_not_contain_other_notes(self):
-        print("time: " + str(time.time() - start_time))
+        
         text = d(resourceId="it.feio.android.omninotes:id/search_query").get_text().split(" ")[1]
         print("search text: " + text)
         if not d(resourceId="it.feio.android.omninotes:id/list").child(resourceId="it.feio.android.omninotes:id/root").exists():
