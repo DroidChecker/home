@@ -2,9 +2,9 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
     
        
 
@@ -19,7 +19,7 @@ class Test(AndroidCheck):
         d(resourceId="com.ichi2.anki:id/note_type_spinner").click()
         
         d(text="Cloze").click()
-        
+        from hypothesis import strategies as st
         text = st.text(alphabet=string.ascii_letters,min_size=1, max_size=6).example() + "{{c1::cloze}}"
         d(description="Text").set_text(text)
         

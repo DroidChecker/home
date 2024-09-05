@@ -2,9 +2,9 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
     
 
     @precondition(lambda self: d(textContains=".zip").exists() and not d(text="Internal Storage").exists() and not d(resourceId="com.amaze.filemanager:id/donate").exists() and not d(text="Cloud Connection").exists() and not d(resourceId="com.amaze.filemanager:id/check_icon").exists())

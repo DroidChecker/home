@@ -1,10 +1,10 @@
 import string
-from droidchecker.main import *
+from kea.main import *
 import time
 import sys
 import re
 
-class Test(AndroidCheck):
+class Test(Kea):
     
 
     @initialize()
@@ -60,30 +60,6 @@ class Test(AndroidCheck):
         assert d(resourceId="net.gsantner.markor:id/ui__filesystem_dialog__list").child_by_text(name,allow_scroll_search=True).exists()
 
 
-
-
-# args = sys.argv[1:]
-# apk_path = args[0]
-# device_serial = args[1]
-# output_dir = args[2]
-# xml_path = args[3]
-# main_path_path = args[4]
-# source_activity = args[5]
-# target_activity = args[6]
-# policy_name = args[7]
-# t = Test()
-
-setting = Setting(
-#     apk_path="./apk/AnkiDroid-2.15.2.apk",
-#     device_serial="emulator-5554",
-#     output_dir="output/anki/random2",
-#     event_count=1000,
-#     xml_path="./xml_graph/Anki_CTG.xml",
-#     source_activity="DeckPicker",
-#     target_activity="Preferences",
-#     policy_name="random", dfs_greedy
-# )
-t = Test()
 
 setting = Setting(
     apk_path="./apk/markor/2.11.1.apk",

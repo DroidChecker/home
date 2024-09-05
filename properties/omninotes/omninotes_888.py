@@ -2,9 +2,9 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
 
     @initialize()
     def set_up(self):
@@ -40,4 +40,4 @@ setting = Setting(
     policy_name="random",
 
 )
-
+run_android_check_as_test(t,setting)

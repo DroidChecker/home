@@ -1,35 +1,10 @@
 import string
-from droidchecker.main import *
+from kea.main import *
 import time
 import sys
 import re
 
-class Test(AndroidCheck):
-    def __init__(
-        self,
-        apk_path,
-        device_serial="emulator-5554",
-        output_dir="output",
-        explore_event_count=0,
-        diverse_event_count=100,
-        main_path_path=None,
-        xml_path="None",
-        source_activity=None,
-        target_activity=None,
-        policy_name="pbt",
-    ):
-        super().__init__(
-            apk_path,
-            device_serial=device_serial,
-            output_dir=output_dir,
-            explore_event_count=explore_event_count,
-            diverse_event_count=diverse_event_count,
-            xml_path=xml_path,
-            main_path_path=main_path_path,
-            source_activity=source_activity,
-            target_activity=target_activity,
-            policy_name=policy_name,
-        )
+class Test(Kea):
 
     @initialize()
     def set_up(self):

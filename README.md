@@ -1,6 +1,6 @@
-# DroidChecker
+# Kea
 
-DroidChecker is a general and practical testing tool based on the idea of property-based testing for finding functional bugs in Android apps.
+Kea is a general and practical testing tool based on the idea of property-based testing for finding functional bugs in Android apps.
 
 📘 [Documentation](https://droidchecker-doc.readthedocs.io/en/latest/)
 
@@ -14,7 +14,7 @@ Requirements:
 You can input following commands to grep and install the required packages.
 
 ```bash
-git clone https://github.com/DroidChecker/home
+git clone https://github.com/Kea/home
 cd home
 pip install -e .
 ```
@@ -22,7 +22,7 @@ pip install -e .
 >**Tips:**   
 > Before you run the commands to create an emulator, you should pay attention to the hardware virtualization:  
 > - For `Windows`  
->   You can run our DroidChecker on Windows directly.  
+>   You can run our Kea on Windows directly.  
 >   You should make sure `Intel VT-x` or `AMD-V` is enabled in `BIOS/UEFI`.  
 >   If your Windows supports `Hyper-V` and you have enabled this feature before, you may need to disable `Hyper-V` because `Hyper-V` will conflict with other virtualization software.
 > - For `Mac OS`  
@@ -30,13 +30,13 @@ pip install -e .
 > - For `Linux`  
 >   You should make sure `Intel VT-x` or `AMD-V` is enabled in `BIOS/UEFI`.  
 > 
-> If you are willing to use virtual machine to run our DroidChecker, This still works. You just need to enable your vm can use hardware virtualization.  
-> Take `Windows` as an example, if you like to use Linux system for developing instead of using windows directly. we recommend you to use [WSL2](https://ubuntu.com/desktop/wsl) to run our DroidChecker. This may can help you run our DroidChecker more fluently than [Vmware](https://www.vmware.com/products/desktop-hypervisor/workstation-and-fusion) and [VirtualBox](https://www.virtualbox.org/).  
+> If you are willing to use virtual machine to run our Kea, This still works. You just need to enable your vm can use hardware virtualization.  
+> Take `Windows` as an example, if you like to use Linux system for developing instead of using windows directly. we recommend you to use [WSL2](https://ubuntu.com/desktop/wsl) to run Kea. This may can help you run Kea more fluently than [Vmware](https://www.vmware.com/products/desktop-hypervisor/workstation-and-fusion) and [VirtualBox](https://www.virtualbox.org/).  
 >> Using [WSL2](https://ubuntu.com/desktop/wsl) to run emulator need you to enable `Hyper-V`, but `Hyper-V` is only available in `Windows Professional\Enterprise\Education` editions.  
 
 
 You can create an emulator before running DroidSChecker. See [this link](https://stackoverflow.com/questions/43275238/how-to-set-system-images-path-when-creating-an-android-avd) for how to create avd using [avdmanager](https://developer.android.com/studio/command-line/avdmanager).
-The following sample command will help you create an emulator, which will help you start using DroidChecker quickly：
+The following sample command will help you create an emulator, which will help you start using Kea quickly：
 
 ```bash
 sdkmanager "build-tools;29.0.3" "platform-tools" "platforms;android-29"
@@ -58,7 +58,7 @@ emulator -avd Android10.0 -read-only -port 5554
 If you have downloaded our project and configured the environment, you only need to enter "example/" to execute our sample property with the following command:
 
 ```
-droidchecker -f example.py -a omninotes.apk
+kea -f example.py -a omninotes.apk
 ```
 
 That's it! You can see the test results in the "output" directory.
@@ -74,7 +74,7 @@ In the bug report, you can see the following information:
 
 ### Optional arguments
 
-DroidChecker provides the following options. please consult ``droidchecker -h`` for a full list.
+Kea provides the following options. please consult ``kea -h`` for a full list.
 
 ``-f``: The test files that contain the properties.
 
@@ -116,7 +116,7 @@ To run this property, we need to define a test class that inherits from ``Androi
 Finally, we can run the property by executing the following command:
 
 ```bash
-droidchecker -f [property_file_name] -a [apk_file_name]
+kea -f [property_file_name] -a [apk_file_name]
 ```
 
 where ``property_file_name`` is the name of the property file.
@@ -209,10 +209,10 @@ The, after testing started, this function will be executed first to pass the wel
 Suppose we have several properties in different files, we can run them together by specifying multiple files in the command line.
 
 ```bash
-droidchecker -f [property_file_name1] [property_file_name2] -a [apk_file_name]
+kea -f [property_file_name1] [property_file_name2] -a [apk_file_name]
 ```
 
-## Bug list found by DroidChecker
+## Bug list found by Kea
 
 * OmniNotes: [#942](https://github.com/federicoiosue/Omni-Notes/issues/942), [#946](https://github.com/federicoiosue/Omni-Notes/issues/946), [#948](https://github.com/federicoiosue/Omni-Notes/issues/948), [#949](https://github.com/federicoiosue/Omni-Notes/issues/949), [#950](https://github.com/federicoiosue/Omni-Notes/issues/950), [#951](https://github.com/federicoiosue/Omni-Notes/issues/951), [#954](https://github.com/federicoiosue/Omni-Notes/issues/954), [#956](https://github.com/federicoiosue/Omni-Notes/issues/956), [#939](https://github.com/federicoiosue/Omni-Notes/issues/939), [#981](https://github.com/federicoiosue/Omni-Notes/issues/981), [#937](https://github.com/federicoiosue/Omni-Notes/issues/937), [#938](https://github.com/federicoiosue/Omni-Notes/issues/938), [#938](https://github.com/federicoiosue/Omni-Notes/issues/937), [#939](https://github.com/federicoiosue/Omni-Notes/issues/937), [#940](https://github.com/federicoiosue/Omni-Notes/issues/940), [#941](https://github.com/federicoiosue/Omni-Notes/issues/941), [#945](https://github.com/federicoiosue/Omni-Notes/issues/945),
 * Markor: [#2153](https://github.com/gsantner/markor/issues/2153), [#2196](https://github.com/gsantner/markor/issues/2196), [#2197](https://github.com/gsantner/markor/issues/2197), [#2198](https://github.com/gsantner/markor/issues/2198), [#2199](https://github.com/gsantner/markor/issues/2199), [#2250](https://github.com/gsantner/markor/issues/2250)

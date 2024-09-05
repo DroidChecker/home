@@ -2,9 +2,9 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
-
-class Test(AndroidCheck):
+from kea.main import *
+from hypothesis import strategies as st
+class Test(Kea):
     
 
     @initialize()

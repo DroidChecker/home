@@ -2,9 +2,9 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
     
     # 2477
     @precondition(lambda self: d(text="Color").exists() and d(text="Customize").exists())

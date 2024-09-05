@@ -2,9 +2,9 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
     
     @precondition(
         lambda self: d(text="Manage activities").exists() and d(resourceId="de.rampro.activitydiary:id/action_show_hide_deleted").exists() and d(description="Navigate up").exists() and d(resourceId="de.rampro.activitydiary:id/activity_name").exists()

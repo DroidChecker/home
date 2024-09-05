@@ -3,15 +3,15 @@ from setuptools import setup, find_packages, findall
 import os
 
 setup(
-    name='droidchecker',
-    packages=find_packages(include=['droidchecker']),
+    name='kea',
+    packages=find_packages(include=['kea']),
     # this must be the same as the name above
     version='1.0.0',
-    description='A lightweight UI-guided test input generator for Android.',
+    description='A property-based testing tool for mobile apps.',
     author='Yuanchun Li',
     license='MIT',
-    author_email='pkulyc@gmail.com',
-    url='https://github.com/DroidChecker/home',  # use the URL to the github repo
+    author_email='yihengx98@gmail.com',
+    url='https://github.com/ecnusse/Kea',  # use the URL to the github repo
     #download_url='https://github.com/honeynet/droidbot/tarball/1.0.2b4',
     keywords=['testing', 'monkey', 'exerciser'],  # arbitrary keywords
     classifiers=[
@@ -34,11 +34,11 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'droidchecker=start:main',
+            'kea=start:main',
         ],
     },
     package_data={
-        'droidchecker': [os.path.relpath(x, 'droidchecker') for x in findall('droidchecker/resources/')]
+        'kea': [os.path.relpath(x, 'kea') for x in findall('kea/resources/')]
     },
     # androidviewclient doesnot support pip install, thus you should install it with easy_install
     install_requires=['networkx', 'Pillow','uiautomator2==3.2.2','androguard==4.0.0'],

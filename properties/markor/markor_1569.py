@@ -1,10 +1,10 @@
 import string
-from droidchecker.main import *
+from kea.main import *
 import time
 import sys
 import re
-
-class Test(AndroidCheck):
+from hypothesis import strategies as st
+class Test(Kea):
     
 
     @initialize()

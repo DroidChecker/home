@@ -2,11 +2,11 @@ import string
 import sys
 import time
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
     
-        self.add_file_names = []
+
     
 
     @precondition(lambda self: d(text="Documents").exists()  and not d(text="Settings").exists())

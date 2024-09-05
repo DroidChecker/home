@@ -1,12 +1,12 @@
-from droidchecker import input_manager
-from droidchecker.main import AndroidCheck, Setting, run_android_check_as_test
+from kea import input_manager
+from kea.main import Kea, Setting, run_android_check_as_test
 
 import importlib
 import os
 import argparse
 import sys
 def parse_args():
-    parser = argparse.ArgumentParser(description="Start Droidchecker to test app.",
+    parser = argparse.ArgumentParser(description="Start kea to test app.",
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-f",nargs="+", action="store",dest="files", help="The python files to be tested.")
     parser.add_argument("-d", "--device_serial", action="store", dest="device_serial", default=input_manager.DEFAULT_DEVICE_SERIAL,
@@ -50,7 +50,7 @@ def import_and_instantiate_classes(files):
             # 寻找模块中的所有类，并尝试实例化它们
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
-                if isinstance(attr, type) and issubclass(attr, AndroidCheck) and attr is not AndroidCheck:
+                if isinstance(attr, type) and issubclass(attr, Kea) and attr is not Kea:
                     instance = attr()  # 实例化子类
                     droidcheck_instance.append(instance)
         except ModuleNotFoundError as e:
@@ -72,7 +72,7 @@ def main():
                        debug_mode=options.debug_mode,
                        keep_app=options.keep_app
                        )
-    print(AndroidCheck._rules_per_class)
+    print(Kea._rules_per_class)
     run_android_check_as_test(test_classes[0],setting)
 
 if __name__ == "__main__":

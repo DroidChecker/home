@@ -1,9 +1,9 @@
-from droidchecker.main import *
+from kea.main import *
 import time
 import sys
 
 
-class Test(AndroidCheck):
+class Test(Kea):
     
 
     @initialize()

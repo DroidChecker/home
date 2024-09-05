@@ -3,9 +3,9 @@ import sys
 import time
 import re
 sys.path.append("..")
-from droidchecker.main import *
+from kea.main import *
 
-class Test(AndroidCheck):
+class Test(Kea):
     
 
     @initialize()
